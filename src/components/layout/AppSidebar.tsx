@@ -11,7 +11,7 @@ export default function AppSidebar() {
       <div className="flex h-full max-h-screen flex-col gap-2">
         <div className="flex h-14 items-center border-b border-sidebar-border px-6">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-            <Image src={appLogo} alt="Ledna Platform Logo" width={84} height={84} data-ai-hint="company logo" />
+            <Image src={appLogo} alt="Ledna Platform Logo" width={252} height={252} data-ai-hint="company logo" />
             <span className="font-headline">Ledna Platform</span>
           </Link>
         </div>
