@@ -10,7 +10,7 @@ export default function MyListingsPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 md:gap-0">
         <h1 className="text-3xl font-bold font-headline">My Commodity Listings</h1>
         <Button asChild>
           <Link href="/dashboard/commodities/upload">

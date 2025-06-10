@@ -31,7 +31,7 @@ export default function CommodityCard({ commodity }: CommodityCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <CardTitle className="text-xl font-headline mb-1">{commodity.name}</CardTitle>
-        <CardDescription className="text-sm text-muted-foreground h-20 overflow-hidden text-ellipsis">
+        <CardDescription className="text-sm text-muted-foreground min-h-[5rem] overflow-hidden text-ellipsis">
           {commodity.description}
         </CardDescription>
         <div className="mt-3 space-y-1">
