@@ -1,6 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
@@ -10,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { SignupSchema } from '@/lib/schemas';
-import { Leaf } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 
@@ -42,7 +43,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4">
       <Link href="/" className="flex items-center gap-2 text-2xl font-semibold text-primary mb-8">
-          <Leaf className="h-8 w-8" />
+          <Image src="/logo.png" alt="Ledna Commodities Logo" width={32} height={32} />
           <span className="font-headline">Ledna Commodities</span>
         </Link>
       <Card className="w-full max-w-md shadow-xl">

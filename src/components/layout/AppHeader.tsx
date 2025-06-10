@@ -1,4 +1,6 @@
+
 import Link from 'next/link';
+import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Leaf, LogOut, User, Settings, LayoutGrid, Menu } from 'lucide-react';
+import { LogOut, User, Settings, LayoutGrid, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import AppSidebarNav from '@/components/layout/AppSidebarNav'; // We'll create this
 import { getCurrentUser } from '@/data/placeholder';
@@ -31,7 +33,7 @@ export default function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
            <div className="p-4 border-b border-sidebar-border">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <Leaf className="h-7 w-7" />
+              <Image src="/logo.png" alt="Ledna Logo" width={28} height={28} />
               <span className="font-headline">Ledna</span>
             </Link>
           </div>

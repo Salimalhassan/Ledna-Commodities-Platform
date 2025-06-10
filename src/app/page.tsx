@@ -1,9 +1,10 @@
+
 import PublicHeader from '@/components/layout/PublicHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Leaf, Package, BarChart3, Users, ShieldCheck } from 'lucide-react';
+import { Package, BarChart3, Users, ShieldCheck } from 'lucide-react';
 
 export default function LandingPage() {
   const features = [
@@ -45,7 +46,7 @@ export default function LandingPage() {
             />
           </div>
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
-            <Leaf className="h-20 w-20 text-primary mx-auto mb-6" />
+            <Image src="/logo.png" alt="Ledna Commodities Logo" width={80} height={80} className="mx-auto mb-6" />
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-6 text-foreground">
               Welcome to Ledna Commodities
             </h1>
