@@ -14,9 +14,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, User, Settings, LayoutGrid, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import AppSidebarNav from '@/components/layout/AppSidebarNav'; 
+import AppSidebarNav from '@/components/layout/AppSidebarNav';
 import { getCurrentUser } from '@/data/placeholder';
-// import appLogo from '@/app/Logo.PNG'; // Removed failing import
 
 
 export default function AppHeader() {
@@ -35,7 +34,7 @@ export default function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
            <div className="p-4 border-b border-sidebar-border">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <Image src="https://placehold.co/28x28.png" alt="Ledna Logo" width={28} height={28} data-ai-hint="company logo small" />
+              <Image src="/logo.png" alt="Ledna Logo" width={28} height={28} data-ai-hint="company logo" />
               <span className="font-headline">Ledna</span>
             </Link>
           </div>
