@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { SignupSchema } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+// import appLogo from '@/app/Logo.PNG'; // Removed failing import
 
 export default function SignupPage() {
   const { toast } = useToast();
@@ -43,7 +44,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4">
       <Link href="/" className="flex items-center gap-2 text-2xl font-semibold text-primary mb-8">
-          <Image src="/logo.png" alt="Ledna Commodities Logo" width={32} height={32} data-ai-hint="company logo" />
+          <Image src="https://placehold.co/32x32.png" alt="Ledna Commodities Logo" width={32} height={32} data-ai-hint="company logo" />
           <span className="font-headline">Ledna Commodities</span>
         </Link>
       <Card className="w-full max-w-md shadow-xl">

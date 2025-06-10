@@ -1,4 +1,5 @@
 
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,8 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { LogOut, User, Settings, LayoutGrid, Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import AppSidebarNav from '@/components/layout/AppSidebarNav'; // We'll create this
+import AppSidebarNav from '@/components/layout/AppSidebarNav'; 
 import { getCurrentUser } from '@/data/placeholder';
+// import appLogo from '@/app/Logo.PNG'; // Removed failing import
 
 
 export default function AppHeader() {
@@ -33,7 +35,7 @@ export default function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
            <div className="p-4 border-b border-sidebar-border">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <Image src="/logo.png" alt="Ledna Logo" width={28} height={28} data-ai-hint="company logo small" />
+              <Image src="https://placehold.co/28x28.png" alt="Ledna Logo" width={28} height={28} data-ai-hint="company logo small" />
               <span className="font-headline">Ledna</span>
             </Link>
           </div>
@@ -67,14 +69,14 @@ export default function AppHeader() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/dashboard/settings"> {/* Assuming a settings page might be added */}
+              <Link href="/dashboard/settings"> 
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href="/"> {/* Logout should ideally clear session and redirect */}
+              <Link href="/"> 
                 <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Link>
