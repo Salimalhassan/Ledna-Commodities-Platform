@@ -44,7 +44,7 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4">
       <Link href="/" className="flex items-center gap-2 text-2xl font-semibold text-primary mb-8">
-          <Image src={appLogo} alt="Ledna Commodities Logo" width={32} height={32} data-ai-hint="company logo" />
+          <Image src={appLogo} alt="Ledna Commodities Logo" width={96} height={96} data-ai-hint="company logo" />
           <span className="font-headline">Ledna Commodities</span>
         </Link>
       <Card className="w-full max-w-md shadow-xl">

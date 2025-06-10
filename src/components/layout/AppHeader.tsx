@@ -34,7 +34,7 @@ export default function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
            <div className="p-4 border-b border-sidebar-border">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <Image src={appLogo} alt="Ledna Logo" width={28} height={28} data-ai-hint="company logo" />
+              <Image src={appLogo} alt="Ledna Logo" width={84} height={84} data-ai-hint="company logo" />
               <span className="font-headline">Ledna</span>
             </Link>
           </div>
