@@ -46,7 +46,7 @@ export default function LandingPage() {
             />
           </div>
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
-            <Image src="/logo.png" alt="Ledna Commodities Logo" width={80} height={80} className="mx-auto mb-6" />
+            <Image src="/logo.png" alt="Ledna Commodities Logo" width={80} height={80} className="mx-auto mb-6" data-ai-hint="company logo large" />
             <h1 className="text-4xl md:text-6xl font-bold font-headline mb-6 text-foreground">
               Welcome to Ledna Commodities
             </h1>
