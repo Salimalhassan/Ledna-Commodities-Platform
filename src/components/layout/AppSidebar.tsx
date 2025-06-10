@@ -1,5 +1,4 @@
 
-
 import Link from 'next/link';
 import Image from 'next/image';
 import AppSidebarNav from './AppSidebarNav';
@@ -9,9 +8,9 @@ export default function AppSidebar() {
   return (
     <aside className="hidden border-r bg-sidebar text-sidebar-foreground md:block w-64">
       <div className="flex h-full max-h-screen flex-col gap-2">
-        <div className="flex h-14 items-center border-b border-sidebar-border px-6">
+        <div className="flex h-24 items-center border-b border-sidebar-border px-6">
           <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-            <Image src={appLogo} alt="Ledna Platform Logo" width={252} height={252} data-ai-hint="company logo" />
+            <Image src={appLogo} alt="Ledna Platform Logo" width={252} height={252} className="h-20 w-20" data-ai-hint="company logo" />
             <span className="font-headline">Ledna Platform</span>
           </Link>
         </div>

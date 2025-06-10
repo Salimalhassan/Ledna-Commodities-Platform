@@ -1,5 +1,4 @@
 
-
 import Link from 'next/link';
 import Image from 'next/image';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,7 +33,7 @@ export default function AppHeader() {
         <SheetContent side="left" className="sm:max-w-xs bg-sidebar text-sidebar-foreground p-0">
            <div className="p-4 border-b border-sidebar-border">
             <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold text-sidebar-primary">
-              <Image src={appLogo} alt="Ledna Logo" width={252} height={252} data-ai-hint="company logo" />
+              <Image src={appLogo} alt="Ledna Logo" width={252} height={252} className="h-20 w-20" data-ai-hint="company logo" />
               <span className="font-headline">Ledna</span>
             </Link>
           </div>
