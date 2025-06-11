@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignupSchema } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
@@ -27,6 +28,7 @@ export default function SignupPage() {
       email: '',
       password: '',
       confirmPassword: '',
+      userType: 'buyer', // Default to buyer, or could be undefined
     },
   });
 
@@ -35,7 +37,7 @@ export default function SignupPage() {
     console.log('Signup submitted:', values);
      toast({
       title: "Signup Attempted",
-      description: "Account creation is a placeholder.",
+      description: `Account creation for ${values.userType} is a placeholder.`,
     });
     // Simulate successful signup redirect
     router.push('/dashboard');
@@ -102,6 +104,40 @@ export default function SignupPage() {
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
                       <Input type="password" placeholder="••••••••" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="userType"
+                render={({ field }) => (
+                  <FormItem className="space-y-3">
+                    <FormLabel>I am a...</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                        className="flex flex-col space-y-1"
+                      >
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="seller" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Seller / Farmer
+                          </FormLabel>
+                        </FormItem>
+                        <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value="buyer" />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            Buyer
+                          </FormLabel>
+                        </FormItem>
+                      </RadioGroup>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

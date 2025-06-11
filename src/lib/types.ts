@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface User {
@@ -13,6 +14,7 @@ export interface User {
   verificationType?: 'NIN' | 'Passport' | '';
   verificationNumber?: string;
   isVerified?: boolean;
+  userType?: 'seller' | 'buyer';
 }
 
 export interface CommodityCategory {
@@ -30,7 +32,7 @@ export interface Commodity {
   unit: string; // e.g., 'kg', 'tonne', 'liter', 'piece'
   imageUrl?: string;
   sellerId: string;
-  sellerName: string; 
+  sellerName: string;
   sellerContact?: string;
   location?: string;
   datePosted: string;
@@ -47,7 +49,7 @@ export interface Review {
 }
 
 export interface MarketTrendDataPoint {
-  date: string; 
+  date: string;
   price: number;
 }
 
