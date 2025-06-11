@@ -14,8 +14,8 @@ import {
   ShoppingCart,
   Search,
   Users,
-  Package, // Re-add if settings icon is needed
-  Settings, // Re-add if settings icon is needed
+  Languages, // Added Languages icon
+  Settings, 
 } from 'lucide-react';
 import { getCurrentUser } from '@/data/placeholder';
 import type { User } from '@/lib/types';
@@ -26,7 +26,6 @@ const sellerNavItems = [
   { href: '/dashboard/commodities/upload', label: 'Upload Commodity', icon: UploadCloud },
   { href: '/dashboard/market-trends', label: 'Market Trends', icon: LineChart },
   { href: '/dashboard/profile', label: 'Profile', icon: UserCircle },
-  // { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 const buyerNavItems = [
@@ -35,14 +34,20 @@ const buyerNavItems = [
   { href: '/dashboard/buyer/transactions', label: 'My Transactions', icon: ShoppingCart },
   { href: '/dashboard/market-trends', label: 'Market Trends', icon: LineChart },
   { href: '/dashboard/profile', label: 'Profile & Verification', icon: UserCircle },
-  // { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+];
+
+// Common navigation items for both user types
+const commonNavItems = [
+  { href: '/dashboard/communication-helper', label: 'Communication Helper', icon: Languages },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function AppSidebarNav() {
   const pathname = usePathname();
-  const currentUser = getCurrentUser(); // In a real app, this would come from auth context
+  const currentUser = getCurrentUser(); 
 
-  const navItems = currentUser.userType === 'seller' ? sellerNavItems : buyerNavItems;
+  const userSpecificNavItems = currentUser.userType === 'seller' ? sellerNavItems : buyerNavItems;
+  const navItems = [...userSpecificNavItems, ...commonNavItems];
 
   return (
     <nav className="grid gap-2 p-4 text-sm font-medium">
@@ -64,22 +69,6 @@ export default function AppSidebarNav() {
           </Link>
         </Button>
       ))}
-       {/* Common Settings link can be added here if desired */}
-       <Button
-          variant={pathname === '/dashboard/settings' ? 'default' : 'ghost'}
-          className={cn(
-            'justify-start gap-2',
-            pathname === '/dashboard/settings'
-              ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90'
-              : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
-          )}
-          asChild
-        >
-          <Link href="/dashboard/settings">
-            <Settings className="h-5 w-5" />
-            Settings
-          </Link>
-        </Button>
     </nav>
   );
 }
