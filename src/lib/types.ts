@@ -6,6 +6,7 @@ export interface User {
   name: string;
   email: string;
   avatarUrl?: string;
+  dataAiHint?: string;
   location?: string;
   address?: string;
   city?: string;
@@ -14,7 +15,7 @@ export interface User {
   verificationType?: 'NIN' | 'Passport' | '';
   verificationNumber?: string;
   isVerified?: boolean;
-  userType?: 'seller' | 'buyer';
+  userType: 'seller' | 'buyer'; // Added userType
 }
 
 export interface CommodityCategory {
@@ -25,12 +26,13 @@ export interface CommodityCategory {
 
 export interface Commodity {
   id: string;
-  name: string;
+  name:string;
   description: string;
   category: CommodityCategory;
   price: number;
   unit: string; // e.g., 'kg', 'tonne', 'liter', 'piece'
   imageUrl?: string;
+  dataAiHint?: string;
   sellerId: string;
   sellerName: string;
   sellerContact?: string;
@@ -56,4 +58,15 @@ export interface MarketTrendDataPoint {
 export interface MarketTrend {
   commodityName: string;
   data: MarketTrendDataPoint[];
+}
+
+export interface Transaction {
+  id: string;
+  date: string;
+  commodityName: string;
+  sellerName: string;
+  quantity: number;
+  unit: string;
+  totalPrice: number;
+  status: 'Completed' | 'Pending' | 'Cancelled';
 }

@@ -1,13 +1,19 @@
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart } from "lucide-react";
+import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart, Search, Users } from "lucide-react";
 import Image from "next/image";
-import { sampleCommodities, getCurrentUser } from "@/data/placeholder";
+import { sampleCommodities, getCurrentUser, sampleUsers } from "@/data/placeholder";
+import type { User } from "@/lib/types";
+import SellerPreviewCard from "@/components/SellerPreviewCard";
+import { Input } from "@/components/ui/input";
+import appLogo from '@/assets/logo.png';
 
-export default function DashboardPage() {
-  const user = getCurrentUser();
+
+// Seller Dashboard Content
+function SellerDashboard({ user }: { user: User }) {
   const userCommodities = sampleCommodities.filter(c => c.sellerId === user.id);
 
   const quickStats = [
@@ -18,9 +24,8 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <>
       <h1 className="text-3xl font-bold mb-6 font-headline">Welcome back, {user.name}!</h1>
-
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
         {quickStats.map(stat => (
           <Card key={stat.title} className="shadow-md hover:shadow-lg transition-shadow">
@@ -36,7 +41,6 @@ export default function DashboardPage() {
           </Card>
         ))}
       </div>
-
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card className="shadow-md">
@@ -71,7 +75,6 @@ export default function DashboardPage() {
             </CardFooter>
           </Card>
         </div>
-
         <div>
           <Card className="shadow-md">
             <CardHeader>
@@ -97,6 +100,59 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+    </>
+  );
+}
+
+// Buyer Dashboard Content
+function BuyerDashboard({ user }: { user: User }) {
+  const potentialSellers = sampleUsers.filter(u => u.userType === 'seller');
+
+  return (
+    <>
+      <h1 className="text-3xl font-bold mb-6 font-headline">Welcome, {user.name}! Discover Commodities & Sellers</h1>
+      
+      <Card className="mb-8 shadow-md">
+        <CardHeader>
+          <CardTitle className="font-headline flex items-center">
+            <Search className="mr-2 h-6 w-6 text-primary" /> Find Commodities
+          </CardTitle>
+          <CardDescription>Search for specific commodities available on the platform.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex gap-2">
+            <Input type="search" placeholder="Search by commodity name, category, etc..." className="flex-grow" />
+            <Button>Search</Button>
+          </div>
+           <p className="text-xs text-muted-foreground mt-2">Tip: Try searching for "Maize", "Organic", or "Fruits". (Search functionality is a placeholder).</p>
+        </CardContent>
+      </Card>
+
+      <section>
+        <h2 className="text-2xl font-bold mb-6 font-headline flex items-center">
+          <Users className="mr-3 h-7 w-7 text-primary" /> Potential Sellers
+        </h2>
+        {potentialSellers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {potentialSellers.map(seller => (
+              <SellerPreviewCard key={seller.id} seller={seller} />
+            ))}
+          </div>
+        ) : (
+          <p className="text-muted-foreground">No sellers found at the moment. Please check back later.</p>
+        )}
+      </section>
+    </>
+  );
+}
+
+
+export default function DashboardPage() {
+  const user = getCurrentUser();
+
+  return (
+    <div className="container mx-auto py-8 px-4 md:px-6">
+      {user.userType === 'seller' ? <SellerDashboard user={user} /> : <BuyerDashboard user={user} />}
     </div>
   );
 }

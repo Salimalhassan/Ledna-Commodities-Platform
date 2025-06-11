@@ -1,4 +1,5 @@
-import type { User, Commodity, CommodityCategory, MarketTrend, Review } from '@/lib/types';
+
+import type { User, Commodity, CommodityCategory, MarketTrend, Review, Transaction } from '@/lib/types';
 import { Leaf, Wheat, Package, Droplets, Apple, Carrot, ListTree, Sprout, Beef } from 'lucide-react';
 
 export const commodityCategories: CommodityCategory[] = [
@@ -6,9 +7,9 @@ export const commodityCategories: CommodityCategory[] = [
   { id: 'pulses', name: 'Pulses', icon: Sprout },
   { id: 'fruits', name: 'Fruits', icon: Apple },
   { id: 'vegetables', name: 'Vegetables', icon: Carrot },
-  { id: 'livestock', name: 'Livestock', icon: Beef }, // Beef icon as placeholder for general livestock
+  { id: 'livestock', name: 'Livestock', icon: Beef },
   { id: 'dairy', name: 'Dairy & Poultry', icon: Droplets },
-  { id: 'oilseeds', name: 'Oilseeds', icon: ListTree }, // ListTree as a generic plant/seed icon
+  { id: 'oilseeds', name: 'Oilseeds', icon: ListTree },
   { id: 'other', name: 'Other', icon: Package },
 ];
 
@@ -25,7 +26,8 @@ export const sampleUsers: User[] = [
     city: 'Nairobi',
     country: 'Kenya',
     isVerified: true,
-    verificationType: 'Passport'
+    verificationType: 'Passport',
+    userType: 'buyer', // Alice is now a buyer
   },
   {
     id: 'user2',
@@ -38,8 +40,24 @@ export const sampleUsers: User[] = [
     address: '456 Farm Road',
     city: 'Eldoret',
     country: 'Kenya',
-    isVerified: false
+    isVerified: false,
+    userType: 'seller', // Bob is a seller
   },
+  {
+    id: 'user3',
+    name: 'Carol Trader',
+    email: 'carol@example.com',
+    avatarUrl: 'https://placehold.co/100x100.png',
+    dataAiHint: 'woman business',
+    location: 'Mombasa, Kenya',
+    phone: '+254 722 555777',
+    address: '789 Trade Street',
+    city: 'Mombasa',
+    country: 'Kenya',
+    isVerified: true,
+    verificationType: 'NIN',
+    userType: 'seller', // Carol is also a seller
+  }
 ];
 
 export const sampleCommodities: Commodity[] = [
@@ -52,10 +70,10 @@ export const sampleCommodities: Commodity[] = [
     unit: 'kg',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'maize field',
-    sellerId: 'user1',
-    sellerName: 'Alice Wonderland',
-    sellerContact: '+254 700 123456',
-    location: 'Nairobi, Kenya',
+    sellerId: 'user2', // Bob sells this
+    sellerName: 'Bob The Farmer',
+    sellerContact: '+254 711 987654',
+    location: 'Eldoret, Kenya',
     datePosted: '2024-07-15',
   },
   {
@@ -67,7 +85,7 @@ export const sampleCommodities: Commodity[] = [
     unit: 'piece',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'apples basket',
-    sellerId: 'user2',
+    sellerId: 'user2', // Bob sells this
     sellerName: 'Bob The Farmer',
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
@@ -82,11 +100,25 @@ export const sampleCommodities: Commodity[] = [
     unit: 'dozen',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'eggs carton',
-    sellerId: 'user1',
-    sellerName: 'Alice Wonderland',
-    location: 'Nakuru, Kenya',
+    sellerId: 'user3', // Carol sells this
+    sellerName: 'Carol Trader',
+    location: 'Mombasa, Kenya',
     datePosted: '2024-07-22',
   },
+  {
+    id: 'com4',
+    name: 'Green Beans',
+    description: 'Tender and fresh green beans, perfect for steaming or stir-frying.',
+    category: commodityCategories[3], // Vegetables
+    price: 3,
+    unit: 'kg',
+    imageUrl: 'https://placehold.co/600x400.png',
+    dataAiHint: 'green beans',
+    sellerId: 'user3', // Carol sells this
+    sellerName: 'Carol Trader',
+    location: 'Mombasa, Kenya',
+    datePosted: '2024-07-23',
+  }
 ];
 
 export const sampleMarketTrends: MarketTrend[] = [
@@ -119,28 +151,61 @@ export const sampleMarketTrends: MarketTrend[] = [
 export const sampleReviews: Review[] = [
   {
     id: 'rev1',
-    sellerId: 'user1',
-    reviewerName: 'Charlie Buyer',
+    sellerId: 'user2', // Review for Bob
+    reviewerName: 'Alice Wonderland',
     rating: 5,
-    comment: 'Excellent quality maize and fast delivery. Highly recommend Alice!',
+    comment: 'Excellent quality maize and fast delivery. Highly recommend Bob!',
     date: '2024-07-18',
   },
   {
     id: 'rev2',
-    sellerId: 'user1',
-    reviewerName: 'Diana Shopper',
+    sellerId: 'user3', // Review for Carol
+    reviewerName: 'Alice Wonderland',
     rating: 4,
     comment: 'Good eggs, fresh as advertised. Packaging could be slightly better.',
     date: '2024-07-23',
   },
   {
     id: 'rev3',
-    sellerId: 'user2',
-    reviewerName: 'Edward Consumer',
+    sellerId: 'user2', // Review for Bob
+    reviewerName: 'Anonymous Buyer',
     rating: 5,
     comment: 'The apples were delicious and very fresh. Bob is a great seller.',
     date: '2024-07-21',
   },
 ];
 
-export const getCurrentUser = (): User => sampleUsers[0]; // Alice as default logged-in user
+export const sampleTransactions: Transaction[] = [
+  {
+    id: 'txn1',
+    date: '2024-07-18',
+    commodityName: 'Organic Maize',
+    sellerName: 'Bob The Farmer',
+    quantity: 20,
+    unit: 'kg',
+    totalPrice: 1000,
+    status: 'Completed',
+  },
+  {
+    id: 'txn2',
+    date: '2024-07-23',
+    commodityName: 'Farm Fresh Eggs',
+    sellerName: 'Carol Trader',
+    quantity: 5,
+    unit: 'dozen',
+    totalPrice: 75,
+    status: 'Completed',
+  },
+  {
+    id: 'txn3',
+    date: '2024-07-25',
+    commodityName: 'Green Beans',
+    sellerName: 'Carol Trader',
+    quantity: 10,
+    unit: 'kg',
+    totalPrice: 30,
+    status: 'Pending',
+  },
+];
+
+export const getCurrentUser = (): User => sampleUsers[0]; // Alice (buyer) as default logged-in user
