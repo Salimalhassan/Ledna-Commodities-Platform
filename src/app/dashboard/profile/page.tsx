@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -179,7 +180,10 @@ export default function ProfilePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Verification Document Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={(value) => field.onChange(value === '__none__' ? '' : value)}
+                        value={field.value === '' ? '__none__' : field.value || undefined}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select document type" />
@@ -188,7 +192,7 @@ export default function ProfilePage() {
                         <SelectContent>
                           <SelectItem value="NIN">National ID (NIN)</SelectItem>
                           <SelectItem value="Passport">International Passport</SelectItem>
-                          <SelectItem value="">None</SelectItem>
+                          <SelectItem value="__none__">None</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
