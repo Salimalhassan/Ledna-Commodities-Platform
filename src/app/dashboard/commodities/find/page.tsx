@@ -13,14 +13,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 export default function FindCommoditiesPage() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
-  // Add more filters for price range, location etc. if needed
+  const [selectedCategory, setSelectedCategory] = useState(''); // Empty string means 'All Categories'
 
   const filteredCommodities = sampleCommodities.filter(commodity => {
     const matchesSearchTerm = commodity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                               commodity.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory ? commodity.category.id === selectedCategory : true;
-    // Add more filter conditions here
     return matchesSearchTerm && matchesCategory;
   });
 
@@ -53,12 +51,17 @@ export default function FindCommoditiesPage() {
             </div>
             <div>
               <label htmlFor="category" className="block text-sm font-medium text-foreground mb-1">Category</label>
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+              <Select
+                value={selectedCategory === '' ? '__all__' : selectedCategory}
+                onValueChange={(value) => {
+                  setSelectedCategory(value === '__all__' ? '' : value);
+                }}
+              >
                 <SelectTrigger id="category">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="__all__">All Categories</SelectItem>
                   {commodityCategories.map((category) => {
                     const Icon = category.icon;
                     return (
