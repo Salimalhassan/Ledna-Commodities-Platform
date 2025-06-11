@@ -27,6 +27,13 @@ const languageOptions = [
   { value: 'Portuguese', label: 'Portuguese' },
   { value: 'German', label: 'German' },
   { value: 'Chinese (Simplified)', label: 'Chinese (Simplified)' },
+  { value: 'Hausa', label: 'Hausa' },
+  { value: 'Yoruba', label: 'Yoruba' },
+  { value: 'Igbo', label: 'Igbo' },
+  { value: 'Zulu', label: 'Zulu' },
+  { value: 'Amharic', label: 'Amharic' },
+  { value: 'Somali', label: 'Somali' },
+  { value: 'Oromo', label: 'Oromo' },
 ];
 
 const targetLanguageOptions = languageOptions.filter(lang => lang.value !== 'Auto-detect');
