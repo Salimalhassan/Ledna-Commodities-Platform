@@ -1,80 +1,217 @@
 
-
 import PublicHeader from '@/components/layout/PublicHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, BarChart3, Users, ShieldCheck } from 'lucide-react';
+import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
 
 export default function LandingPage() {
-  const features = [
+  const coreFeatures = [
     {
       icon: <Package className="h-10 w-10 text-primary" />,
-      title: 'Wide Range of Commodities',
-      description: 'Explore and trade various agricultural products from trusted sellers.',
+      title: 'Direct Commodity Listings',
+      description: 'Farmers showcase products; buyers discover a wide range of commodities directly.',
+    },
+    {
+      icon: <MessageCircle className="h-10 w-10 text-primary" />,
+      title: 'AI Communication Helper',
+      description: 'Overcome language and literacy barriers with AI-powered translation for seamless negotiation.',
+    },
+    {
+      icon: <ShieldCheck className="h-10 w-10 text-primary" />,
+      title: 'Verified Users & Trust',
+      description: 'Connect with identity-verified sellers and buyers to foster secure and transparent transactions.',
     },
     {
       icon: <BarChart3 className="h-10 w-10 text-primary" />,
       title: 'Market Insights',
-      description: 'Stay updated with the latest market trends and price fluctuations.',
-    },
-    {
-      icon: <Users className="h-10 w-10 text-primary" />,
-      title: 'Verified Sellers',
-      description: 'Connect with sellers whose identities are verified for secure transactions.',
-    },
-    {
-      icon: <ShieldCheck className="h-10 w-10 text-primary" />,
-      title: 'Secure Platform',
-      description: 'A robust platform ensuring safe and transparent commodity trading.',
+      description: 'Access relevant market trends and pricing information to make informed decisions.',
     },
   ];
 
+  const farmerBenefits = [
+    { title: "Wider Market Access", description: "Reach beyond local markets to national and international buyers.", icon: <Zap className="h-8 w-8 text-primary" /> },
+    { title: "Fairer Pricing", description: "Gain more control over your pricing by connecting directly with buyers.", icon: <DollarSign className="h-8 w-8 text-primary" /> },
+    { title: "Reduced Barriers", description: "Our AI tools help bridge communication gaps, even with limited literacy.", icon: <MessageCircle className="h-8 w-8 text-primary" /> },
+  ];
+
+  const buyerBenefits = [
+    { title: "Diverse Sourcing", description: "Find a wide variety of agricultural products from numerous verified farmers.", icon: <Search className="h-8 w-8 text-primary" /> },
+    { title: "Direct from Farm", description: "Source fresh commodities directly from producers, ensuring quality.", icon: <Leaf className="h-8 w-8 text-primary" /> },
+    { title: "Efficient Communication", description: "Connect and negotiate effectively, regardless of language differences.", icon: <Smartphone className="h-8 w-8 text-primary" /> },
+  ];
+
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 bg-gradient-to-br from-secondary/30 to-background">
-          <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0 opacity-10">
             <Image
               src="https://placehold.co/1920x1080.png"
               alt="Agricultural background"
               fill
               style={{objectFit: 'cover'}}
-              data-ai-hint="farm landscape"
+              data-ai-hint="farm landscape fields"
             />
           </div>
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
-            <Image src={appLogo} alt="Ledna Commodities Logo" width={480} height={480} className="mx-auto mb-6" data-ai-hint="company logo large" />
-            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-6 text-foreground">
-              Welcome to Ledna Commodities
+            <Image src={appLogo} alt="Ledna Commodities Logo" width={160} height={160} className="mx-auto mb-6 rounded-2xl shadow-xl" data-ai-hint="company logo large" />
+            <h1 className="text-4xl md:text-6xl font-bold font-headline mb-6">
+              Ledna Commodities
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
-              Your trusted platform for sourcing and trading agricultural commodities. Connect with sellers, explore products, and grow your business.
+            <p className="text-2xl md:text-3xl font-light text-primary mb-8">
+              Bridging Fields, Connecting Worlds.
+            </p>
+            <p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
+              Empowering local farmers and streamlining global agricultural trade through direct connections and AI-powered communication.
             </p>
             <div className="space-x-4">
               <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="/auth/signup">Get Started</Link>
+                <Link href="/auth/signup">Join Ledna</Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
-                <Link href="/dashboard/market-trends">View Market Trends</Link>
+                <Link href="#how-it-works">Learn More</Link>
               </Button>
             </div>
           </div>
         </section>
 
-        {/* Features Section */}
-        <section className="py-16 md:py-24 bg-background">
+        {/* The Challenge We Address Section */}
+        <section id="challenge" className="py-16 md:py-24 bg-muted/30">
           <div className="container mx-auto px-4 md:px-6">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12 text-foreground">
-              Why Choose Ledna?
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">The Challenge We Address</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                Millions of smallholder farmers face significant barriers to accessing fair markets and communicating effectively, limiting their growth and potential.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <Card className="shadow-lg">
+                <CardHeader className="items-center text-center">
+                  <Users className="h-12 w-12 text-destructive mb-2" />
+                  <CardTitle className="font-headline">Limited Market Access</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground">Farmers often rely on local middlemen, receiving lower prices and missing out on larger opportunities.</p>
+                </CardContent>
+              </Card>
+              <Card className="shadow-lg">
+                <CardHeader className="items-center text-center">
+                  <MessageCircle className="h-12 w-12 text-destructive mb-2" />
+                  <CardTitle className="font-headline">Communication Gaps</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground">Language and literacy differences hinder effective negotiation and trust-building with diverse buyers.</p>
+                </CardContent>
+              </Card>
+              <Card className="shadow-lg">
+                <CardHeader className="items-center text-center">
+                  <BarChart3 className="h-12 w-12 text-destructive mb-2" />
+                  <CardTitle className="font-headline">Information Asymmetry</CardTitle>
+                </CardHeader>
+                <CardContent className="text-center">
+                  <p className="text-muted-foreground">Lack of transparent market data prevents farmers from making informed selling decisions.</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* Our Solution Section */}
+        <section id="solution" className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline mb-4">Our Solution: Ledna Commodities Platform</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Ledna is a mobile-first platform designed to directly connect local farmers with a global network of buyers, leveraging AI to break down communication barriers and foster transparent trade.
+              </p>
+            </div>
+             <div className="max-w-4xl mx-auto">
+                <Image src="https://placehold.co/1200x600.png" alt="Ledna Platform Mockup" width={1200} height={600} className="rounded-lg shadow-2xl" data-ai-hint="app interface dashboard" />
+            </div>
+          </div>
+        </section>
+
+        {/* How It Works Section */}
+        <section id="how-it-works" className="py-16 md:py-24 bg-secondary/20">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">How Ledna Works</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+              <div className="flex flex-col items-center text-center">
+                <div className="bg-primary text-primary-foreground rounded-full p-4 mb-4 inline-flex shadow-md">
+                  <UserPlus className="h-10 w-10" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">1. Sign Up & List</h3>
+                <p className="text-muted-foreground">Farmers and buyers create profiles. Farmers easily list their commodities with details and images.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                 <div className="bg-primary text-primary-foreground rounded-full p-4 mb-4 inline-flex shadow-md">
+                  <Search className="h-10 w-10" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">2. Discover & Connect</h3>
+                <p className="text-muted-foreground">Buyers search and filter for specific commodities. Our AI translates messages for clear communication.</p>
+              </div>
+              <div className="flex flex-col items-center text-center">
+                 <div className="bg-primary text-primary-foreground rounded-full p-4 mb-4 inline-flex shadow-md">
+                  <ThumbsUp className="h-10 w-10" />
+                </div>
+                <h3 className="text-xl font-semibold mb-2">3. Transact & Grow</h3>
+                <p className="text-muted-foreground">Parties agree on terms and proceed with trade. Ledna fosters trust and opens new growth avenues.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+        
+        {/* Benefits Sections */}
+        <section id="benefits" className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid lg:grid-cols-2 gap-12 items-center">
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold font-headline mb-6">Empowering Farmers</h3>
+                <ul className="space-y-6">
+                  {farmerBenefits.map(benefit => (
+                    <li key={benefit.title} className="flex items-start gap-4">
+                      <div className="flex-shrink-0 mt-1">{benefit.icon}</div>
+                      <div>
+                        <h4 className="text-lg font-semibold">{benefit.title}</h4>
+                        <p className="text-muted-foreground">{benefit.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="text-2xl md:text-3xl font-bold font-headline mb-6">Advantaging Buyers</h3>
+                 <ul className="space-y-6">
+                  {buyerBenefits.map(benefit => (
+                    <li key={benefit.title} className="flex items-start gap-4">
+                      <div className="flex-shrink-0 mt-1">{benefit.icon}</div>
+                      <div>
+                        <h4 className="text-lg font-semibold">{benefit.title}</h4>
+                        <p className="text-muted-foreground">{benefit.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Core Features Section */}
+        <section id="features" className="py-16 md:py-24 bg-muted/30">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
+              Platform Core Features
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {features.map((feature, index) => (
-                <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+              {coreFeatures.map((feature, index) => (
+                <Card key={index} className="shadow-lg hover:shadow-xl transition-shadow duration-300 bg-card">
                   <CardHeader className="items-center text-center">
                     {feature.icon}
                     <CardTitle className="mt-4 font-headline">{feature.title}</CardTitle>
@@ -88,14 +225,50 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 md:py-24 bg-secondary/20">
+        {/* Our Vision Section */}
+        <section id="vision" className="py-16 md:py-24 bg-primary/10 text-primary-foreground">
           <div className="container mx-auto px-4 md:px-6 text-center">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6 text-foreground">
-              Ready to Grow Your Agri-Business?
+            <Lightbulb className="h-16 w-16 text-primary mx-auto mb-6" />
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6 text-foreground">Our Vision</h2>
+            <p className="text-lg md:text-xl text-foreground/80 mb-8 max-w-3xl mx-auto">
+              To create a world where every farmer, regardless of location or literacy, has an equal opportunity to thrive by participating in fair and transparent global trade. We envision Ledna as the leading catalyst for this transformation in Africa and beyond.
+            </p>
+          </div>
+        </section>
+
+        {/* Meet the Team (Placeholder) Section */}
+        <section id="team" className="py-16 md:py-24 bg-background">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">Meet the (Future) Team</h2>
+            <p className="text-lg text-muted-foreground text-center max-w-xl mx-auto mb-10">
+              We are a passionate group dedicated to leveraging technology for agricultural empowerment. (Full team details coming soon!)
+            </p>
+            <div className="flex justify-center">
+              <Card className="w-full max-w-sm p-6 shadow-lg">
+                <CardHeader className="items-center text-center p-0">
+                    <Avatar className="h-24 w-24 mb-4">
+                        <AvatarImage src="https://placehold.co/100x100.png" alt="Founder" data-ai-hint="person professional" />
+                        <AvatarFallback>LC</AvatarFallback>
+                    </Avatar>
+                    <CardTitle className="font-headline text-xl">Your Name Here</CardTitle>
+                    <CardDescription>Founder & CEO (Placeholder)</CardDescription>
+                </CardHeader>
+                <CardContent className="text-center mt-4 p-0">
+                    <p className="text-sm text-muted-foreground">"Driven to connect communities and create sustainable impact through technology."</p>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </section>
+
+        {/* CTA Section */}
+        <section id="cta" className="py-16 md:py-24 bg-secondary/20">
+          <div className="container mx-auto px-4 md:px-6 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6">
+              Ready to Transform Agricultural Trade?
             </h2>
             <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-              Join our community of farmers, traders, and businesses today.
+              Join our community of farmers, traders, and businesses. Sign up today to start connecting and growing.
             </p>
             <Button size="lg" asChild className="bg-accent hover:bg-accent/90 text-accent-foreground">
               <Link href="/auth/signup">Sign Up Now</Link>
@@ -105,12 +278,92 @@ export default function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="py-8 bg-card border-t">
-        <div className="container mx-auto px-4 md:px-6 text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Ledna Commodities Platform. All rights reserved.</p>
-          <p className="text-sm mt-1">Empowering Agriculture, Connecting Markets.</p>
+      <footer className="py-12 bg-card border-t">
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <Link href="/" className="flex items-center gap-2 text-xl font-semibold text-primary mb-2">
+                <Image src={appLogo} alt="Ledna Commodities Logo" width={48} height={48} data-ai-hint="company logo small"/>
+                <span className="font-headline">Ledna Commodities</span>
+              </Link>
+              <p className="text-sm text-muted-foreground">Empowering Agriculture, Connecting Markets.</p>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Quick Links</h5>
+              <ul className="space-y-2 text-sm">
+                <li><Link href="#solution" className="text-muted-foreground hover:text-primary">Our Solution</Link></li>
+                <li><Link href="#how-it-works" className="text-muted-foreground hover:text-primary">How It Works</Link></li>
+                <li><Link href="#features" className="text-muted-foreground hover:text-primary">Features</Link></li>
+                <li><Link href="/auth/signup" className="text-muted-foreground hover:text-primary">Sign Up</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h5 className="font-semibold mb-3">Contact (Placeholder)</h5>
+               <ul className="space-y-2 text-sm">
+                <li className="flex items-center gap-2 text-muted-foreground"><Mail className="h-4 w-4 text-primary" /> info@lednacommodities.com</li>
+                <li className="flex items-center gap-2 text-muted-foreground"><Smartphone className="h-4 w-4 text-primary" /> +1 (234) 567-890</li>
+                {/* Add social media links if desired */}
+              </ul>
+            </div>
+          </div>
+          <div className="border-t pt-8 text-center text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} Ledna Commodities Platform. All rights reserved.</p>
+            <p className="mt-1">
+              <Link href="#" className="hover:text-primary">Privacy Policy (Placeholder)</Link> | <Link href="#" className="hover:text-primary">Terms of Service (Placeholder)</Link>
+            </p>
+          </div>
         </div>
       </footer>
     </div>
   );
 }
+
+// Helper Icons (if not already used/imported elsewhere and needed specifically here)
+function UserPlus(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <line x1="19" x2="19" y1="8" y2="14"/>
+      <line x1="22" x2="16" y1="11" y2="11"/>
+    </svg>
+  );
+}
+
+function ThumbsUp(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M7 10v12"/>
+      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 1.79 1.11L15 5.88Z"/>
+    </svg>
+  );
+}
+
+function Search(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8"/>
+      <path d="m21 21-4.3-4.3"/>
+    </svg>
+  );
+}
+
+function DollarSign(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" x2="12" y1="2" y2="22"/>
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+    </svg>
+  );
+}
+
+function Leaf(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/>
+      <path d="M12 13a7 7 0 0 1 7-7h2a10 10 0 0 0-10-10zM12 13V4"/>
+    </svg>
+  );
+}
+
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
