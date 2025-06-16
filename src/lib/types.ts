@@ -39,6 +39,7 @@ export interface Commodity {
   location?: string;
   datePosted: string;
   externalLink?: string;
+  isFeatured?: boolean; // Added for featured listings
 }
 
 export interface Review {

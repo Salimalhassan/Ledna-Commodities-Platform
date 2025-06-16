@@ -75,6 +75,7 @@ export const sampleCommodities: Commodity[] = [
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
     datePosted: '2024-07-15',
+    isFeatured: true, // This item is now featured
   },
   {
     id: 'com2',
@@ -90,6 +91,7 @@ export const sampleCommodities: Commodity[] = [
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
     datePosted: '2024-07-20',
+    isFeatured: false,
   },
   {
     id: 'com3',

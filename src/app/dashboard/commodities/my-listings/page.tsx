@@ -1,3 +1,4 @@
+
 import CommodityCard from '@/components/CommodityCard';
 import { Button } from '@/components/ui/button';
 import { sampleCommodities, getCurrentUser } from '@/data/placeholder';
@@ -22,7 +23,7 @@ export default function MyListingsPage() {
       {userCommodities.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {userCommodities.map((commodity) => (
-            <CommodityCard key={commodity.id} commodity={commodity} />
+            <CommodityCard key={commodity.id} commodity={commodity} showFeatureManagement={true} />
           ))}
         </div>
       ) : (

@@ -5,13 +5,14 @@ import type { Commodity } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, MapPin, Eye } from 'lucide-react';
+import { DollarSign, MapPin, Eye, Star, PlusCircle, CheckCircle } from 'lucide-react';
 
 interface CommodityCardProps {
   commodity: Commodity;
+  showFeatureManagement?: boolean;
 }
 
-export default function CommodityCard({ commodity }: CommodityCardProps) {
+export default function CommodityCard({ commodity, showFeatureManagement = false }: CommodityCardProps) {
   const CategoryIcon = commodity.category.icon;
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -24,6 +25,11 @@ export default function CommodityCard({ commodity }: CommodityCardProps) {
           className="w-full h-48 object-cover"
           data-ai-hint={commodity.dataAiHint || "commodity product"}
         />
+        {commodity.isFeatured && (
+          <Badge variant="default" className="absolute top-2 left-2 bg-accent text-accent-foreground shadow-md">
+            <Star className="mr-1 h-3 w-3" /> Featured
+          </Badge>
+        )}
          {CategoryIcon && (
           <Badge variant="default" className="absolute top-2 right-2 bg-primary/80 text-primary-foreground backdrop-blur-sm">
             <CategoryIcon className="mr-1 h-4 w-4" /> {commodity.category.name}
@@ -47,11 +53,23 @@ export default function CommodityCard({ commodity }: CommodityCardProps) {
         </div>
       </CardContent>
       <CardFooter className="p-4 border-t">
-        <Button asChild className="w-full">
-          <Link href={`/sellers/${commodity.sellerId}`}>
-            <Eye className="mr-2 h-4 w-4" /> View Seller Profile
-          </Link>
-        </Button>
+        {showFeatureManagement ? (
+          commodity.isFeatured ? (
+            <Badge variant="secondary" className="w-full justify-center py-2 text-base bg-green-100 text-green-700 border-green-300">
+              <CheckCircle className="mr-2 h-5 w-5" /> Currently Featured
+            </Badge>
+          ) : (
+            <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
+              <PlusCircle className="mr-2 h-5 w-5" /> Feature Listing (Placeholder)
+            </Button>
+          )
+        ) : (
+          <Button asChild className="w-full">
+            <Link href={`/sellers/${commodity.sellerId}`}>
+              <Eye className="mr-2 h-4 w-4" /> View Seller Profile
+            </Link>
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );
