@@ -80,17 +80,17 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
             <div className="mt-6 border-t pt-6 space-y-4">
               <Alert variant="default" className="bg-primary/10 border-primary/30">
                 <Lock className="h-5 w-5 text-primary" />
-                <AlertTitle className="font-headline text-primary">Unlock Seller Details & Contact</AlertTitle>
+                <AlertTitle className="font-headline text-primary">Connect with {seller.name}</AlertTitle>
                 <AlertDescription className="text-primary/80">
-                  To view detailed contact information (email, phone) and initiate a conversation with {seller.name}, please upgrade your account or use a contact credit. (This is a placeholder for monetization).
+                  Good news! Your first 3 seller contacts on Ledna are free. This allows you to view full details and initiate conversations. After your free contacts are used, a premium subscription will be needed to continue connecting with new sellers. (This is a placeholder for monetization and free trial tracking).
                 </AlertDescription>
-                <Button className="mt-3">Contact {seller.name} (Premium)</Button>
+                <Button className="mt-3">Contact {seller.name}</Button>
               </Alert>
 
               <div className="space-y-2 text-sm text-foreground/80">
-                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email hidden - Unlock to view</span></p>
-                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone hidden - Unlock to view</span></p>}
-                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Full address hidden - Unlock to view ({seller.city}, {seller.country})</span></p>}
+                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email hidden - Contact seller to view</span></p>
+                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone hidden - Contact seller to view</span></p>}
+                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Full address hidden - Contact seller to view ({seller.city}, {seller.country})</span></p>}
               </div>
             </div>
           </CardContent>
