@@ -62,10 +62,11 @@ export default function CommunicationHelperPage() {
     try {
       const result = await handleTranslateMessage(values);
       if (result.translatedText.startsWith('Error:')) {
+         const errorMessage = result.translatedText.substring('Error:'.length).trim();
          toast({
             variant: 'destructive',
             title: 'Translation Error',
-            description: result.translatedText,
+            description: errorMessage || 'An unexpected error occurred during translation.',
           });
           setTranslatedText('');
       } else {
