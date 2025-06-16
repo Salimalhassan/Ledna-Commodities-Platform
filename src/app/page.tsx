@@ -1,11 +1,16 @@
 
+'use client';
+
 import PublicHeader from '@/components/layout/PublicHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone } from 'lucide-react';
+import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Autoplay from "embla-carousel-autoplay";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 export default function LandingPage() {
   const coreFeatures = [
@@ -41,6 +46,37 @@ export default function LandingPage() {
     { title: "Diverse Sourcing", description: "Find a wide variety of agricultural products from numerous verified farmers.", icon: <Search className="h-8 w-8 text-primary" /> },
     { title: "Direct from Farm", description: "Source fresh commodities directly from producers, ensuring quality.", icon: <Leaf className="h-8 w-8 text-primary" /> },
     { title: "Efficient Communication", description: "Connect and negotiate effectively, regardless of language differences.", icon: <Smartphone className="h-8 w-8 text-primary" /> },
+  ];
+
+  const featuredCommodities = [
+    {
+      src: "https://image.zuplo.com/blob/2511954a-5fdd-4789-9d5e-9c8a5721824b/corn.png",
+      alt: "Corn",
+      title: "Fresh Corn",
+      description: "High-quality, locally sourced corn.",
+      dataAiHint: "corn field crop"
+    },
+    {
+      src: "https://placehold.co/600x400.png",
+      alt: "Apples",
+      title: "Crisp Apples",
+      description: "Juicy and ready for market.",
+      dataAiHint: "apples basket fruit"
+    },
+    {
+      src: "https://placehold.co/600x400.png",
+      alt: "Wheat",
+      title: "Golden Wheat",
+      description: "Perfect for milling and export.",
+      dataAiHint: "wheat field grain"
+    },
+    {
+      src: "https://placehold.co/600x400.png",
+      alt: "Coffee Beans",
+      title: "Aromatic Coffee Beans",
+      description: "Sustainably grown coffee beans.",
+      dataAiHint: "coffee beans roasted"
+    },
   ];
 
 
@@ -132,7 +168,7 @@ export default function LandingPage() {
               </p>
             </div>
              <div className="max-w-4xl mx-auto">
-                <Image src="https://placehold.co/1200x600.png" alt="Ledna Platform Mockup" width={1200} height={600} className="rounded-lg shadow-2xl" data-ai-hint="app interface dashboard" />
+                <Image src="https://placehold.co/1200x600.png" alt="Ledna Platform Mockup" width={1200} height={600} className="rounded-lg shadow-2xl mb-12" data-ai-hint="app interface dashboard" />
             </div>
           </div>
         </section>
@@ -275,6 +311,46 @@ export default function LandingPage() {
             </Button>
           </div>
         </section>
+
+        {/* Featured Commodities Carousel Section */}
+        <section id="featured-commodities" className="py-16 md:py-24 bg-muted/20">
+          <div className="container mx-auto px-4 md:px-6">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline text-center mb-12">
+              Featured Commodities
+            </h2>
+            <Carousel
+              plugins={[Autoplay({ delay: 4000, stopOnInteraction: true })]}
+              className="w-full max-w-lg md:max-w-2xl lg:max-w-4xl mx-auto"
+              opts={{ loop: true }}
+            >
+              <CarouselContent>
+                {featuredCommodities.map((commodity, index) => (
+                  <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                    <div className="p-1">
+                      <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
+                        <CardContent className="flex flex-col items-center justify-center p-4 aspect-[4/3]">
+                          <Image 
+                            src={commodity.src} 
+                            alt={commodity.alt} 
+                            width={400} 
+                            height={300} 
+                            className="rounded-md mb-4 object-cover w-full h-40" 
+                            data-ai-hint={commodity.dataAiHint}
+                          />
+                          <h3 className="text-lg font-semibold font-headline">{commodity.title}</h3>
+                          <p className="text-sm text-muted-foreground text-center px-2">{commodity.description}</p>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="hidden sm:flex" />
+              <CarouselNext className="hidden sm:flex" />
+            </Carousel>
+          </div>
+        </section>
+
       </main>
 
       {/* Footer */}
@@ -317,53 +393,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-// Helper Icons (if not already used/imported elsewhere and needed specifically here)
-function UserPlus(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <line x1="19" x2="19" y1="8" y2="14"/>
-      <line x1="22" x2="16" y1="11" y2="11"/>
-    </svg>
-  );
-}
-
-function ThumbsUp(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 10v12"/>
-      <path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2h0a2 2 0 0 1 1.79 1.11L15 5.88Z"/>
-    </svg>
-  );
-}
-
-function Search(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/>
-      <path d="m21 21-4.3-4.3"/>
-    </svg>
-  );
-}
-
-function DollarSign(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" x2="12" y1="2" y2="22"/>
-      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-    </svg>
-  );
-}
-
-function Leaf(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M11 20A7 7 0 0 1 4 13H2a10 10 0 0 0 10 10z"/>
-      <path d="M12 13a7 7 0 0 1 7-7h2a10 10 0 0 0-10-10zM12 13V4"/>
-    </svg>
-  );
-}
-
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
