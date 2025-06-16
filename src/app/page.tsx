@@ -57,6 +57,20 @@ export default function LandingPage() {
       dataAiHint: "corn field crop"
     },
     {
+      src: "https://image.zuplo.com/blob/b3e3c251-a647-4186-8cea-4e2fd000a002/sorghum.png",
+      alt: "Sorghum",
+      title: "Nutritious Sorghum",
+      description: "Versatile and drought-resistant grain.",
+      dataAiHint: "sorghum field grain"
+    },
+    {
+      src: "https://image.zuplo.com/blob/18055a92-4a01-4410-814e-0ba8494b1580/hay-bales.png",
+      alt: "Hay Bales",
+      title: "Quality Hay Bales",
+      description: "Nutrient-rich hay for livestock feed.",
+      dataAiHint: "hay bale farm"
+    },
+    {
       src: "https://placehold.co/600x400.png",
       alt: "Apples",
       title: "Crisp Apples",
