@@ -1,3 +1,4 @@
+
 import Image from 'next/image';
 import { sampleUsers, sampleCommodities, sampleReviews } from '@/data/placeholder';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,13 +8,13 @@ import CommodityCard from '@/components/CommodityCard';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PublicHeader from '@/components/layout/PublicHeader';
-import { Mail, MapPin, Phone, ShieldCheck, Star } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, Star, Lock } from 'lucide-react';
 import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function SellerProfilePage({ params }: { params: { sellerId: string } }) {
   const seller = sampleUsers.find(u => u.id === params.sellerId);
-  // For now, assume seller is always found from sample data, or show a not found message.
-  // In a real app, you'd fetch this data.
+
   if (!seller) {
     return (
       <>
@@ -31,8 +32,8 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
 
   const sellerCommodities = sampleCommodities.filter(c => c.sellerId === seller.id);
   const sellerReviews = sampleReviews.filter(r => r.sellerId === seller.id);
-  const averageRating = sellerReviews.length > 0 
-    ? sellerReviews.reduce((acc, r) => acc + r.rating, 0) / sellerReviews.length 
+  const averageRating = sellerReviews.length > 0
+    ? sellerReviews.reduce((acc, r) => acc + r.rating, 0) / sellerReviews.length
     : 0;
   const sellerInitials = seller.name.split(' ').map(n => n[0]).join('').toUpperCase();
 
@@ -42,11 +43,11 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
       <main className="container mx-auto py-8 px-4 md:px-6">
         <Card className="mb-8 shadow-xl overflow-hidden">
           <div className="relative h-48 bg-gradient-to-r from-primary/20 to-accent/20">
-             <Image 
-                src="https://placehold.co/1200x300.png" 
-                alt={`${seller.name}'s cover photo`} 
-                layout="fill" 
-                objectFit="cover" 
+             <Image
+                src="https://placehold.co/1200x300.png"
+                alt={`${seller.name}'s cover photo`}
+                fill
+                style={{objectFit: 'cover'}}
                 className="opacity-50"
                 data-ai-hint="farm pattern"
              />
@@ -73,13 +74,24 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                 <p className="text-sm text-muted-foreground mt-1">
                   {averageRating > 0 ? `${averageRating.toFixed(1)} (${sellerReviews.length} reviews)` : 'No reviews yet'}
                 </p>
-                 <Button variant="outline" className="mt-2">Contact Seller (Mock)</Button>
               </div>
             </div>
-            <div className="mt-6 border-t pt-6 space-y-2 text-sm text-foreground/80">
-                <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary" /> {seller.email}</p>
-                {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary" /> {seller.phone}</p>}
-                {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary" /> {seller.address}, {seller.city}, {seller.country}</p>}
+
+            <div className="mt-6 border-t pt-6 space-y-4">
+              <Alert variant="default" className="bg-primary/10 border-primary/30">
+                <Lock className="h-5 w-5 text-primary" />
+                <AlertTitle className="font-headline text-primary">Unlock Seller Details & Contact</AlertTitle>
+                <AlertDescription className="text-primary/80">
+                  To view detailed contact information (email, phone) and initiate a conversation with {seller.name}, please upgrade your account or use a contact credit. (This is a placeholder for monetization).
+                </AlertDescription>
+                <Button className="mt-3">Contact {seller.name} (Premium)</Button>
+              </Alert>
+
+              <div className="space-y-2 text-sm text-foreground/80">
+                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email hidden - Unlock to view</span></p>
+                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone hidden - Unlock to view</span></p>}
+                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Full address hidden - Unlock to view ({seller.city}, {seller.country})</span></p>}
+              </div>
             </div>
           </CardContent>
         </Card>
