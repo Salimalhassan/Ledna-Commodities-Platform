@@ -8,8 +8,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
-import cornImage from '@/assets/corn.jpg'; 
-import coffeeImage from '@/assets/coffee.jpg'; 
+import cornImage from '@/assets/corn.jpg';
+import coffeeImage from '@/assets/coffee.jpg';
+import paddyJpg from '@/assets/paddy.jpg';
+import soyaJpg from '@/assets/soya.jpg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -73,21 +75,21 @@ export default function LandingPage() {
       dataAiHint: "hay bale farm"
     },
     {
-      src: "https://placehold.co/600x400.png",
-      alt: "Apples",
-      title: "Crisp Apples",
-      description: "Juicy and ready for market.",
-      dataAiHint: "apples basket fruit"
+      src: soyaJpg,
+      alt: "Soya Beans",
+      title: "Soya Beans",
+      description: "High-protein soya beans, versatile for many uses.",
+      dataAiHint: "soya beans pile"
     },
     {
-      src: "https://placehold.co/600x400.png",
-      alt: "Wheat",
-      title: "Golden Wheat",
-      description: "Perfect for milling and export.",
-      dataAiHint: "wheat field grain"
+      src: paddyJpg,
+      alt: "Rice Paddy",
+      title: "Rice Paddy",
+      description: "Ready for harvest rice paddy.",
+      dataAiHint: "rice paddy field"
     },
     {
-      src: coffeeImage, // Using local coffee image again
+      src: coffeeImage, 
       alt: "Roasted Coffee Blend",
       title: "Roasted Coffee Blend",
       description: "Perfectly roasted for a smooth and rich taste.",
