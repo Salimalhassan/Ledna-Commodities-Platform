@@ -10,9 +10,9 @@ import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefca
 import appLogo from '@/assets/logo.png';
 import cornImage from '@/assets/corn.jpg';
 import coffeeImage from '@/assets/coffee.jpg';
-// import haybaleJpg from '@/assets/haybale.jpg'; // Temporarily removed
+import haybalesJpg from '@/assets/haybales.jpg';
 import soyaJpg from '@/assets/soya.jpg';
-// import paddyJpg from '@/assets/paddy.jpg'; // Temporarily removed
+// import paddyJpg from '@/assets/Paddy.jpg'; // Temporarily reverted
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -69,7 +69,7 @@ export default function LandingPage() {
       dataAiHint: "coffee beans sack"
     },
     {
-      src: 'https://placehold.co/600x400.png', 
+      src: haybalesJpg,
       alt: "Hay Bales",
       title: "Quality Hay Bales",
       description: "Nutrient-rich hay for livestock feed.",
@@ -83,7 +83,7 @@ export default function LandingPage() {
       dataAiHint: "soya beans pile"
     },
     {
-      src: 'https://placehold.co/600x400.png', // Reverted Paddy to placeholder
+      src: 'https://placehold.co/600x400.png', // paddyJpg reverted
       alt: "Rice Paddy",
       title: "Rice Paddy",
       description: "Ready for harvest rice paddy.",
