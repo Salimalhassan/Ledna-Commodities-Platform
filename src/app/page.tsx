@@ -10,8 +10,9 @@ import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefca
 import appLogo from '@/assets/logo.png';
 import cornImage from '@/assets/corn.jpg';
 import coffeeImage from '@/assets/coffee.jpg';
-import paddyJpg from '@/assets/paddy.jpg';
+// import haybaleJpg from '@/assets/haybale.jpg'; // Temporarily removed
 import soyaJpg from '@/assets/soya.jpg';
+// import paddyJpg from '@/assets/paddy.jpg'; // Temporarily removed
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -68,7 +69,7 @@ export default function LandingPage() {
       dataAiHint: "coffee beans sack"
     },
     {
-      src: "https://image.zuplo.com/blob/18055a92-4a01-4410-814e-0ba8494b1580/hay-bales.png",
+      src: 'https://placehold.co/600x400.png', 
       alt: "Hay Bales",
       title: "Quality Hay Bales",
       description: "Nutrient-rich hay for livestock feed.",
@@ -82,7 +83,7 @@ export default function LandingPage() {
       dataAiHint: "soya beans pile"
     },
     {
-      src: paddyJpg,
+      src: 'https://placehold.co/600x400.png', // Reverted Paddy to placeholder
       alt: "Rice Paddy",
       title: "Rice Paddy",
       description: "Ready for harvest rice paddy.",
@@ -354,7 +355,7 @@ export default function LandingPage() {
                             height={300} 
                             className="rounded-md mb-4 object-cover w-full h-40" 
                             data-ai-hint={commodity.dataAiHint}
-                            placeholder={typeof commodity.src === 'object' ? "blur" : undefined}
+                            placeholder={typeof commodity.src === 'object' || (typeof commodity.src === 'string' && commodity.src.startsWith('/')) ? "blur" : undefined}
                           />
                           <h3 className="text-lg font-semibold font-headline">{commodity.title}</h3>
                           <p className="text-sm text-muted-foreground text-center px-2">{commodity.description}</p>
