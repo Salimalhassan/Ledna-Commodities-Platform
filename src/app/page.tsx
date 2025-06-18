@@ -4,7 +4,7 @@
 import PublicHeader from '@/components/layout/PublicHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import Image from 'next/image';
+import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
@@ -13,9 +13,18 @@ import coffeeImage from '@/assets/coffee.jpg';
 import haybalesJpg from '@/assets/haybales.jpg';
 import soyaJpg from '@/assets/soya.jpg';
 import paddyJpg from '@/assets/paddy.jpg';
+import farmerImage from '@/assets/farmer.jpg'; // Import for farmer image
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+
+interface FeaturedCommodity {
+  src: string | StaticImageData;
+  alt: string;
+  title: string;
+  description: string;
+  dataAiHint: string;
+}
 
 export default function LandingPage() {
   const coreFeatures = [
@@ -53,7 +62,7 @@ export default function LandingPage() {
     { title: "Efficient Communication", description: "Connect and negotiate effectively, regardless of language differences.", icon: <Smartphone className="h-8 w-8 text-primary" /> },
   ];
 
-  const featuredCommodities = [
+  const featuredCommodities: FeaturedCommodity[] = [
     {
       src: cornImage,
       alt: "Kenyan Corn",
@@ -90,7 +99,7 @@ export default function LandingPage() {
       dataAiHint: "rice paddy field"
     },
     {
-      src: coffeeImage,
+      src: coffeeImage, // Re-using coffee image as per previous request
       alt: "Roasted Coffee Blend",
       title: "Roasted Coffee Blend",
       description: "Perfectly roasted for a smooth and rich taste.",
@@ -187,7 +196,15 @@ export default function LandingPage() {
               </p>
             </div>
              <div className="max-w-4xl mx-auto">
-                <Image src="https://placehold.co/1200x600.png" alt="Ledna Platform Mockup" width={1200} height={600} className="rounded-lg shadow-2xl mb-12" data-ai-hint="app interface dashboard" />
+                <Image 
+                  src={farmerImage} 
+                  alt="Farmer using Ledna platform" 
+                  width={1200} 
+                  height={600} 
+                  className="rounded-lg shadow-2xl mb-12" 
+                  data-ai-hint="farmer technology"
+                  placeholder="blur" 
+                />
             </div>
           </div>
         </section>
