@@ -341,43 +341,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* Partnership with AgDevCo Section */}
-        <section id="partnership-agdevco" className="py-16 md:py-24 bg-muted/20">
-          <div className="container mx-auto px-4 md:px-6 text-center">
-            <Handshake className="h-16 w-16 text-primary mx-auto mb-6" />
-            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6 text-foreground">
-              Collaboration Opportunity: AgDevCo & Ledna Commodities
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-              Ledna Commodities is seeking to partner with forward-thinking organizations like AgDevCo to amplify our impact on smallholder farmers and agricultural value chains across Africa.
-            </p>
-            <div className="max-w-3xl mx-auto text-left space-y-4 text-foreground/80">
-              <p>
-                Our platform connects local farmers directly with buyers, leveraging AI-powered communication tools to overcome language and literacy barriers. We believe this aligns strongly with AgDevCo&apos;s mission to support the development of sustainable and impactful agribusinesses.
-              </p>
-              <p>
-                A partnership could involve:
-              </p>
-              <ul className="list-disc list-inside space-y-2 pl-4">
-                <li>Integrating Ledna&apos;s platform with AgDevCo&apos;s network of agricultural enterprises.</li>
-                <li>Co-developing initiatives to improve market access and financial literacy for farmers.</li>
-                <li>Leveraging AgDevCo&apos;s expertise to scale Ledna&apos;s reach and impact across the continent.</li>
-                <li>Jointly pursuing funding opportunities to enhance technological capabilities and expand services.</li>
-              </ul>
-              <p>
-                We are confident that by combining AgDevCo&apos;s investment and development expertise with Ledna&apos;s innovative technology and deep understanding of local contexts, we can create a significant positive change for African agriculture.
-              </p>
-            </div>
-            <div className="mt-10">
-              <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
-                <Link href="mailto:partnerships@lednacommodities.com?subject=Partnership Inquiry: AgDevCo & Ledna Commodities">
-                  <Mail className="mr-2 h-5 w-5" /> Explore Partnership
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section id="cta" className="py-16 md:py-24 bg-secondary/20">
           <div className="container mx-auto px-4 md:px-6 text-center">
