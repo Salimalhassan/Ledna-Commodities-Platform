@@ -75,7 +75,7 @@ export const sampleCommodities: Commodity[] = [
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
     datePosted: '2024-07-15',
-    isFeatured: true, // This item is now featured
+    isFeatured: true, 
   },
   {
     id: 'com2',
@@ -101,7 +101,7 @@ export const sampleCommodities: Commodity[] = [
     price: 15,
     unit: 'dozen',
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'eggs carton',
+    dataAiHint: 'eggs carton', // Added dataAiHint
     sellerId: 'user3', // Carol sells this
     sellerName: 'Carol Trader',
     location: 'Mombasa, Kenya',
@@ -115,7 +115,7 @@ export const sampleCommodities: Commodity[] = [
     price: 3,
     unit: 'kg',
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'green beans',
+    dataAiHint: 'green beans', // Added dataAiHint
     sellerId: 'user3', // Carol sells this
     sellerName: 'Carol Trader',
     location: 'Mombasa, Kenya',
