@@ -8,6 +8,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
+import cornImage from '@/assets/corn.jpg'; 
+import coffeeImage from '@/assets/coffee.jpg'; 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -50,18 +52,18 @@ export default function LandingPage() {
 
   const featuredCommodities = [
     {
-      src: "https://image.zuplo.com/blob/2511954a-5fdd-4789-9d5e-9c8a5721824b/corn.png",
-      alt: "Corn",
+      src: cornImage,
+      alt: "Kenyan Corn",
       title: "Fresh Corn",
-      description: "High-quality, locally sourced corn.",
-      dataAiHint: "corn field crop"
+      description: "Locally sourced Kenyan corn, fresh from the farm.",
+      dataAiHint: "corn cob maize"
     },
     {
-      src: "https://image.zuplo.com/blob/b3e3c251-a647-4186-8cea-4e2fd000a002/sorghum.png",
-      alt: "Sorghum",
-      title: "Nutritious Sorghum",
-      description: "Versatile and drought-resistant grain.",
-      dataAiHint: "sorghum field grain"
+      src: coffeeImage,
+      alt: "Kenyan Coffee Beans",
+      title: "Kenyan AA Coffee Beans",
+      description: "Rich and aromatic Grade AA coffee beans.",
+      dataAiHint: "coffee beans sack"
     },
     {
       src: "https://image.zuplo.com/blob/18055a92-4a01-4410-814e-0ba8494b1580/hay-bales.png",
@@ -85,11 +87,11 @@ export default function LandingPage() {
       dataAiHint: "wheat field grain"
     },
     {
-      src: "https://placehold.co/600x400.png",
-      alt: "Coffee Beans",
-      title: "Aromatic Coffee Beans",
-      description: "Sustainably grown coffee beans.",
-      dataAiHint: "coffee beans roasted"
+      src: coffeeImage, // Using local coffee image again
+      alt: "Roasted Coffee Blend",
+      title: "Roasted Coffee Blend",
+      description: "Perfectly roasted for a smooth and rich taste.",
+      dataAiHint: "coffee cup roasted"
     },
   ];
 
@@ -350,6 +352,7 @@ export default function LandingPage() {
                             height={300} 
                             className="rounded-md mb-4 object-cover w-full h-40" 
                             data-ai-hint={commodity.dataAiHint}
+                            placeholder={typeof commodity.src === 'object' ? "blur" : undefined}
                           />
                           <h3 className="text-lg font-semibold font-headline">{commodity.title}</h3>
                           <p className="text-sm text-muted-foreground text-center px-2">{commodity.description}</p>
