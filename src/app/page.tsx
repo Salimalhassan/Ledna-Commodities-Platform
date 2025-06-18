@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
-import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf } from 'lucide-react';
+import { Package, BarChart3, Users, ShieldCheck, Target, Lightbulb, Zap, Briefcase, Mail, MessageCircle, Smartphone, Search, ThumbsUp, UserPlus, DollarSign, Leaf, Handshake } from 'lucide-react';
 import appLogo from '@/assets/logo.png';
 import cornImage from '@/assets/corn.jpg';
 import coffeeImage from '@/assets/coffee.jpg';
@@ -24,6 +24,7 @@ interface FeaturedCommodity {
   title: string;
   description: string;
   dataAiHint: string;
+  placeholder?: "blur" | "empty";
 }
 
 export default function LandingPage() {
@@ -68,42 +69,48 @@ export default function LandingPage() {
       alt: "Kenyan Corn",
       title: "Fresh Corn",
       description: "Locally sourced Kenyan corn, fresh from the farm.",
-      dataAiHint: "corn cob maize"
+      dataAiHint: "corn cob maize",
+      placeholder: "blur",
     },
     {
       src: coffeeImage,
       alt: "Kenyan Coffee Beans",
       title: "Kenyan AA Coffee Beans",
       description: "Rich and aromatic Grade AA coffee beans.",
-      dataAiHint: "coffee beans sack"
+      dataAiHint: "coffee beans sack",
+      placeholder: "blur",
     },
     {
       src: haybalesJpg,
       alt: "Hay Bales",
       title: "Quality Hay Bales",
       description: "Nutrient-rich hay for livestock feed.",
-      dataAiHint: "hay bale farm"
+      dataAiHint: "hay bale farm",
+      placeholder: "blur",
     },
     {
       src: soyaJpg,
       alt: "Soya Beans",
       title: "Soya Beans",
       description: "High-protein soya beans, versatile for many uses.",
-      dataAiHint: "soya beans pile"
+      dataAiHint: "soya beans pile",
+      placeholder: "blur",
     },
     {
       src: paddyJpg,
       alt: "Rice Paddy",
       title: "Rice Paddy",
       description: "Ready for harvest rice paddy.",
-      dataAiHint: "rice paddy field"
+      dataAiHint: "rice paddy field",
+      placeholder: "blur",
     },
     {
-      src: coffeeImage, 
+      src: coffeeImage,
       alt: "Roasted Coffee Blend",
       title: "Roasted Coffee Blend",
       description: "Perfectly roasted for a smooth and rich taste.",
-      dataAiHint: "coffee cup roasted"
+      dataAiHint: "coffee cup roasted",
+      placeholder: "blur",
     },
   ];
 
@@ -197,14 +204,14 @@ export default function LandingPage() {
               </p>
             </div>
              <div className="max-w-4xl mx-auto">
-                <Image 
-                  src={farmerImage} 
-                  alt="Farmer using Ledna platform" 
-                  width={1200} 
-                  height={600} 
-                  className="rounded-lg shadow-2xl mb-12" 
+                <Image
+                  src={farmerImage}
+                  alt="Farmer using Ledna platform"
+                  width={1200}
+                  height={600}
+                  className="rounded-lg shadow-2xl mb-12"
                   data-ai-hint="farmer technology"
-                  placeholder="blur" 
+                  placeholder="blur"
                 />
             </div>
           </div>
@@ -239,7 +246,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
-        
+
         {/* Benefits Sections */}
         <section id="benefits" className="py-16 md:py-24 bg-background">
           <div className="container mx-auto px-4 md:px-6">
@@ -334,6 +341,43 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* Partnership with AgDevCo Section */}
+        <section id="partnership-agdevco" className="py-16 md:py-24 bg-muted/20">
+          <div className="container mx-auto px-4 md:px-6 text-center">
+            <Handshake className="h-16 w-16 text-primary mx-auto mb-6" />
+            <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6 text-foreground">
+              Collaboration Opportunity: AgDevCo & Ledna Commodities
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+              Ledna Commodities is seeking to partner with forward-thinking organizations like AgDevCo to amplify our impact on smallholder farmers and agricultural value chains across Africa.
+            </p>
+            <div className="max-w-3xl mx-auto text-left space-y-4 text-foreground/80">
+              <p>
+                Our platform connects local farmers directly with buyers, leveraging AI-powered communication tools to overcome language and literacy barriers. We believe this aligns strongly with AgDevCo&apos;s mission to support the development of sustainable and impactful agribusinesses.
+              </p>
+              <p>
+                A partnership could involve:
+              </p>
+              <ul className="list-disc list-inside space-y-2 pl-4">
+                <li>Integrating Ledna&apos;s platform with AgDevCo&apos;s network of agricultural enterprises.</li>
+                <li>Co-developing initiatives to improve market access and financial literacy for farmers.</li>
+                <li>Leveraging AgDevCo&apos;s expertise to scale Ledna&apos;s reach and impact across the continent.</li>
+                <li>Jointly pursuing funding opportunities to enhance technological capabilities and expand services.</li>
+              </ul>
+              <p>
+                We are confident that by combining AgDevCo&apos;s investment and development expertise with Ledna&apos;s innovative technology and deep understanding of local contexts, we can create a significant positive change for African agriculture.
+              </p>
+            </div>
+            <div className="mt-10">
+              <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary/10">
+                <Link href="mailto:partnerships@lednacommodities.com?subject=Partnership Inquiry: AgDevCo & Ledna Commodities">
+                  <Mail className="mr-2 h-5 w-5" /> Explore Partnership
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
+
         {/* CTA Section */}
         <section id="cta" className="py-16 md:py-24 bg-secondary/20">
           <div className="container mx-auto px-4 md:px-6 text-center">
@@ -366,14 +410,14 @@ export default function LandingPage() {
                     <div className="p-1">
                       <Card className="overflow-hidden shadow-md hover:shadow-lg transition-shadow">
                         <CardContent className="flex flex-col items-center justify-center p-4 aspect-[4/3]">
-                          <Image 
-                            src={commodity.src} 
-                            alt={commodity.alt} 
-                            width={400} 
-                            height={300} 
-                            className="rounded-md mb-4 object-cover w-full h-40" 
+                          <Image
+                            src={commodity.src}
+                            alt={commodity.alt}
+                            width={400}
+                            height={300}
+                            className="rounded-md mb-4 object-cover w-full h-40"
                             data-ai-hint={commodity.dataAiHint}
-                            placeholder={typeof commodity.src === 'object' || (typeof commodity.src === 'string' && commodity.src.startsWith('/')) ? "blur" : undefined}
+                            placeholder={commodity.placeholder}
                           />
                           <h3 className="text-lg font-semibold font-headline">{commodity.title}</h3>
                           <p className="text-sm text-muted-foreground text-center px-2">{commodity.description}</p>
@@ -431,7 +475,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
-    
-
-    
