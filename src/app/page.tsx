@@ -12,7 +12,7 @@ import cornImage from '@/assets/corn.jpg';
 import coffeeImage from '@/assets/coffee.jpg';
 import haybalesJpg from '@/assets/haybales.jpg';
 import soyaJpg from '@/assets/soya.jpg';
-// import paddyJpg from '@/assets/Paddy.jpg'; // Temporarily reverted
+import paddyJpg from '@/assets/paddy.jpg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -83,14 +83,14 @@ export default function LandingPage() {
       dataAiHint: "soya beans pile"
     },
     {
-      src: 'https://placehold.co/600x400.png', // paddyJpg reverted
+      src: paddyJpg,
       alt: "Rice Paddy",
       title: "Rice Paddy",
       description: "Ready for harvest rice paddy.",
       dataAiHint: "rice paddy field"
     },
     {
-      src: coffeeImage, 
+      src: coffeeImage,
       alt: "Roasted Coffee Blend",
       title: "Roasted Coffee Blend",
       description: "Perfectly roasted for a smooth and rich taste.",
@@ -413,3 +413,5 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    
