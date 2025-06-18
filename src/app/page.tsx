@@ -13,7 +13,7 @@ import coffeeImage from '@/assets/coffee.jpg';
 import haybalesJpg from '@/assets/haybales.jpg';
 import soyaJpg from '@/assets/soya.jpg';
 import paddyJpg from '@/assets/paddy.jpg';
-import farmerImage from '@/assets/farmer.jpg'; // Import for farmer image
+import farmerImage from '@/assets/farmer.jpg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -99,7 +99,7 @@ export default function LandingPage() {
       dataAiHint: "rice paddy field"
     },
     {
-      src: coffeeImage, // Re-using coffee image as per previous request
+      src: coffeeImage, 
       alt: "Roasted Coffee Blend",
       title: "Roasted Coffee Blend",
       description: "Perfectly roasted for a smooth and rich taste.",
@@ -116,11 +116,12 @@ export default function LandingPage() {
         <section className="relative py-20 md:py-32 bg-gradient-to-br from-secondary/30 to-background">
           <div className="absolute inset-0 opacity-10">
             <Image
-              src="https://placehold.co/1920x1080.png"
-              alt="Agricultural background"
+              src={coffeeImage}
+              alt="Coffee plantation background"
               fill
               style={{objectFit: 'cover'}}
-              data-ai-hint="farm landscape fields"
+              data-ai-hint="coffee plantation farm"
+              placeholder="blur"
             />
           </div>
           <div className="container mx-auto px-4 md:px-6 text-center relative z-10">
@@ -430,5 +431,7 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    
 
     
