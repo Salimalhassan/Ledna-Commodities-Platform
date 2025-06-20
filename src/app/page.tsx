@@ -17,6 +17,7 @@ import farmerImage from '@/assets/farmer.jpg';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Autoplay from "embla-carousel-autoplay";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useABTest } from '@/hooks/use-ab-test';
 
 interface FeaturedCommodity {
   src: string | StaticImageData;
@@ -28,6 +29,10 @@ interface FeaturedCommodity {
 }
 
 export default function LandingPage() {
+  const ctaVariant = useABTest('HomePageCTA');
+
+  const ctaButtonText = ctaVariant === 'B' ? 'Get Started Today' : 'Join Ledna';
+
   const coreFeatures = [
     {
       icon: <Package className="h-10 w-10 text-primary group-hover:text-accent group-hover:scale-110 transition-all duration-300 ease-in-out" />,
@@ -145,7 +150,7 @@ export default function LandingPage() {
             </p>
             <div className="space-x-4">
               <Button size="lg" asChild className="bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-lg">
-                <Link href="/auth/signup">Join Ledna</Link>
+                <Link href="/auth/signup">{ctaButtonText}</Link>
               </Button>
               <Button size="lg" variant="outline" asChild className="border-primary text-primary hover:bg-primary/10 transition-all duration-300 ease-in-out hover:scale-105 hover:shadow-md">
                 <Link href="#how-it-works">Learn More</Link>
@@ -418,4 +423,3 @@ export default function LandingPage() {
     </div>
   );
 }
-
