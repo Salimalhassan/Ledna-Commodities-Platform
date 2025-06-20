@@ -7,7 +7,7 @@ import type { Commodity } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, MapPin, Eye, Star, PlusCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { DollarSign, MapPin, Eye, Star, PlusCircle, XCircle, Loader2 } from 'lucide-react';
 import { commodityCategories } from '@/data/placeholder'; // For icons
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -23,11 +23,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { unfeatureCommodity } from '@/actions/commodityActions';
-import { createCheckoutSession } from '@/actions/stripeActions';
-import { loadStripe } from '@stripe/stripe-js';
-
-// Initialize Stripe.js with your publishable key
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+import { createPaystackTransaction } from '@/actions/paystackActions'; // New Paystack Action
+import { useAuth } from '@/context/AuthContext'; // To get user email
 
 interface CommodityCardProps {
   commodity: Commodity;
@@ -37,14 +34,15 @@ interface CommodityCardProps {
 
 export default function CommodityCard({ commodity, showFeatureManagement = false, onFeatureStatusChange }: CommodityCardProps) {
   const { toast } = useToast();
+  const { currentUser } = useAuth(); // Get current user
   const categoryDetails = commodityCategories.find(cat => cat.id === commodity.categoryId);
   const CategoryIcon = categoryDetails?.icon;
   const [isUnfeaturing, setIsUnfeaturing] = useState(false);
   const [isFeaturing, setIsFeaturing] = useState(false);
 
-  // For simulation purposes
-  const FEATURE_PRICE_USD = 5; // e.g., $5 USD
-  const FEATURE_PRICE_CENTS = FEATURE_PRICE_USD * 100; // Stripe requires price in cents
+  // For simulation/display purposes.
+  const FEATURE_PRICE_USD = 5; // Example price
+  const FEATURE_PRICE_CENTS = FEATURE_PRICE_USD * 100; // Paystack uses lowest currency unit (kobo/cents)
 
   const handleUnfeature = async () => {
     setIsUnfeaturing(true);
@@ -77,38 +75,33 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
   }
 
   const handleFeatureRequest = async () => {
+    if (!currentUser?.email) {
+      toast({ variant: "destructive", title: "Authentication Error", description: "Could not find your email. Please log in again." });
+      return;
+    }
+    
     setIsFeaturing(true);
-    toast({ title: "Redirecting to payment..." });
+    toast({ title: "Initializing payment..." });
 
     try {
-      // 1. Create a checkout session on the server
-      const { sessionId, error } = await createCheckoutSession({
+      // 1. Create a transaction session on the server
+      const { authorization_url, error } = await createPaystackTransaction({
         commodityId: commodity.id,
         commodityName: commodity.name,
-        priceInCents: FEATURE_PRICE_CENTS,
+        priceInKobo: FEATURE_PRICE_CENTS, // Using example price in cents
+        userEmail: currentUser.email,
+        currency: 'USD', // Specify currency
       });
 
-      if (error || !sessionId) {
+      if (error || !authorization_url) {
         toast({ variant: "destructive", title: "Error", description: error || "Could not create a payment session." });
         setIsFeaturing(false);
         return;
       }
       
-      // 2. Redirect to Stripe Checkout
-      const stripe = await stripePromise;
-      if (!stripe) {
-        toast({ variant: "destructive", title: "Error", description: "Stripe.js has not loaded yet." });
-        setIsFeaturing(false);
-        return;
-      }
+      // 2. Redirect to Paystack Checkout page
+      window.location.href = authorization_url;
 
-      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
-      
-      if (stripeError) {
-         toast({ variant: "destructive", title: "Redirect Failed", description: stripeError.message });
-         setIsFeaturing(false);
-      }
-      // If redirection fails, the user stays on the page and the loading state is turned off.
     } catch (clientError) {
       toast({ variant: "destructive", title: "Client Error", description: clientError instanceof Error ? clientError.message : "An unexpected error occurred." });
       setIsFeaturing(false);
@@ -201,7 +194,7 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
                   <AlertDialogTitle>Feature Your Listing?</AlertDialogTitle>
                   <AlertDialogDescription>
                     Make "{commodity.name}" a featured listing to increase its visibility.
-                    This service costs ${FEATURE_PRICE_USD}. Clicking 'Proceed to Payment' will redirect you to our secure payment processor.
+                    This service costs ${FEATURE_PRICE_USD}. Clicking 'Proceed to Payment' will redirect you to our secure payment processor, Paystack.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
