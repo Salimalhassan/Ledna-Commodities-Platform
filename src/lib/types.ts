@@ -77,4 +77,3 @@ export interface Transaction {
   totalPrice: number;
   status: 'Completed' | 'Pending' | 'Cancelled';
 }
-

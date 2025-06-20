@@ -7,7 +7,7 @@ import { PlusCircle, PackageSearch, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { Commodity } from '@/lib/types';
 import { fetchUserCommodities } from '@/actions/commodityActions';
 import { useToast } from '@/hooks/use-toast';
@@ -22,30 +22,39 @@ export default function MyListingsPage() {
   const [userCommodities, setUserCommodities] = useState<Commodity[]>([]);
   const [isLoadingCommodities, setIsLoadingCommodities] = useState(true);
 
-  useEffect(() => {
-    async function loadUserCommodities() {
-      if (currentUser?.uid && currentUser.userType === 'seller') {
-        setIsLoadingCommodities(true);
-        try {
-          const fetchedCommodities = await fetchUserCommodities(currentUser.uid);
-          setUserCommodities(fetchedCommodities);
-        } catch (error) {
-          console.error("Failed to fetch user commodities:", error);
-          toast({ variant: "destructive", title: "Error", description: "Could not load your listings." });
-        } finally {
-          setIsLoadingCommodities(false);
-        }
-      } else if (currentUser && currentUser.userType !== 'seller') {
-        setIsLoadingCommodities(false); // Not a seller, no commodities to load
-      } else if (!currentUser && !authLoading) {
-         setIsLoadingCommodities(false); // Not logged in
+  const loadUserCommodities = useCallback(async () => {
+    if (currentUser?.uid && currentUser.userType === 'seller') {
+      setIsLoadingCommodities(true);
+      try {
+        const fetchedCommodities = await fetchUserCommodities(currentUser.uid);
+        setUserCommodities(fetchedCommodities);
+      } catch (error) {
+        console.error("Failed to fetch user commodities:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load your listings." });
+      } finally {
+        setIsLoadingCommodities(false);
       }
+    } else if (currentUser && currentUser.userType !== 'seller') {
+      setIsLoadingCommodities(false); 
+    } else if (!currentUser && !authLoading) {
+       setIsLoadingCommodities(false); 
     }
+  }, [currentUser, authLoading, toast]);
 
+  useEffect(() => {
     if (!authLoading) {
         loadUserCommodities();
     }
-  }, [currentUser, authLoading, toast]);
+  }, [authLoading, loadUserCommodities]);
+
+  const handleFeatureStatusChange = (commodityId: string, newStatus: boolean) => {
+    setUserCommodities(prevCommodities =>
+      prevCommodities.map(c =>
+        c.id === commodityId ? { ...c, isFeatured: newStatus } : c
+      )
+    );
+  };
+
 
   if (authLoading || (currentUser?.userType === 'seller' && isLoadingCommodities && userCommodities.length === 0) ) {
     return (
@@ -124,7 +133,12 @@ export default function MyListingsPage() {
       ) : userCommodities.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {userCommodities.map((commodity) => (
-            <CommodityCard key={commodity.id} commodity={commodity} showFeatureManagement={true} />
+            <CommodityCard 
+              key={commodity.id} 
+              commodity={commodity} 
+              showFeatureManagement={true}
+              onFeatureStatusChange={handleFeatureStatusChange} 
+            />
           ))}
         </div>
       ) : (
