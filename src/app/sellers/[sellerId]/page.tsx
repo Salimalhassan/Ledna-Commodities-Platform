@@ -10,7 +10,6 @@ import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PublicHeader from '@/components/layout/PublicHeader';
 import AddReviewForm from '@/components/AddReviewForm';
-import TransactionDialog from '@/components/TransactionDialog'; // Import new component
 import { Mail, MapPin, Phone, ShieldCheck, Star, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -34,7 +33,6 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
   const [sellerCommodities, setSellerCommodities] = useState<Commodity[]>([]);
   const [sellerReviews, setSellerReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedCommodity, setSelectedCommodity] = useState<Commodity | null>(null); // State for the dialog
 
   const loadSellerReviews = useCallback(async () => {
     try {
@@ -81,22 +79,6 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
     }
   }, [params.sellerId, toast]);
   
-  const handlePurchaseClick = (commodity: Commodity) => {
-    if (!currentUser) {
-      toast({ variant: 'destructive', title: 'Login Required', description: 'Please log in to make a purchase.' });
-      router.push('/auth/login');
-      return;
-    }
-    if (currentUser.userType !== 'buyer') {
-       toast({ variant: 'destructive', title: 'Buyers Only', description: 'Only users registered as buyers can make purchases.' });
-       return;
-    }
-     if (currentUser.uid === commodity.sellerId) {
-      toast({ variant: 'destructive', title: 'Action Not Allowed', description: 'You cannot purchase your own commodity.' });
-      return;
-    }
-    setSelectedCommodity(commodity);
-  };
 
   if (isLoading) {
     return (
@@ -157,16 +139,6 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
     <>
       <PublicHeader />
       <main className="container mx-auto py-8 px-4 md:px-6">
-        {selectedCommodity && (
-          <TransactionDialog
-            isOpen={!!selectedCommodity}
-            onOpenChange={() => setSelectedCommodity(null)}
-            commodity={selectedCommodity}
-            onTransactionComplete={() => {
-              toast({ title: "Next Steps", description: "The seller has been notified. Check your transactions page for updates."})
-            }}
-          />
-        )}
         <Card className="mb-8 shadow-xl overflow-hidden">
           <div className="relative h-48 bg-gradient-to-r from-primary/20 to-accent/20">
              <Image
@@ -229,8 +201,6 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                 <CommodityCard 
                   key={commodity.id} 
                   commodity={commodity}
-                  showPurchaseButton={true}
-                  onPurchaseClick={handlePurchaseClick}
                 />
               ))}
             </div>

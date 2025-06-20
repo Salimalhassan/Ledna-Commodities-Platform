@@ -50,10 +50,3 @@ export const ReviewSchema = z.object({
   rating: z.number().min(1, { message: "Rating is required." }).max(5),
   comment: z.string().min(10, { message: "Comment must be at least 10 characters." }).max(500, { message: "Comment cannot exceed 500 characters." }),
 });
-
-export const TransactionSchema = z.object({
-  quantity: z.preprocess(
-    (val) => parseFloat(String(val)),
-    z.number().positive({ message: "Quantity must be a positive number." })
-  ),
-});

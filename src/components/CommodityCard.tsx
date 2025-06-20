@@ -7,7 +7,7 @@ import type { Commodity } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, MapPin, Eye, Star, PlusCircle, XCircle, Loader2, ShoppingCart } from 'lucide-react';
+import { DollarSign, MapPin, Eye, Star, PlusCircle, XCircle, Loader2 } from 'lucide-react';
 import { commodityCategories } from '@/data/placeholder'; // For icons
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -29,17 +29,13 @@ import { useAuth } from '@/context/AuthContext'; // To get user email
 interface CommodityCardProps {
   commodity: Commodity;
   showFeatureManagement?: boolean;
-  showPurchaseButton?: boolean;
   onFeatureStatusChange?: (commodityId: string, newStatus: boolean) => void;
-  onPurchaseClick?: (commodity: Commodity) => void;
 }
 
 export default function CommodityCard({ 
   commodity, 
   showFeatureManagement = false, 
-  showPurchaseButton = false,
   onFeatureStatusChange,
-  onPurchaseClick 
 }: CommodityCardProps) {
   const { toast } = useToast();
   const { currentUser } = useAuth(); // Get current user
@@ -117,15 +113,6 @@ export default function CommodityCard({
   }
   
   const renderFooter = () => {
-    if (showPurchaseButton) {
-      return (
-        <Button className="w-full" onClick={() => onPurchaseClick?.(commodity)}>
-          <ShoppingCart className="mr-2 h-4 w-4" />
-          Make Purchase
-        </Button>
-      );
-    }
-
     if (showFeatureManagement) {
       return commodity.isFeatured ? (
         <AlertDialog>
