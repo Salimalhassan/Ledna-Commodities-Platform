@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, MapPin, Eye, Star, PlusCircle, CheckCircle } from 'lucide-react';
 import { commodityCategories } from '@/data/placeholder'; // For icons
+import { useToast } from '@/hooks/use-toast';
 
 interface CommodityCardProps {
   commodity: Commodity;
@@ -14,8 +15,29 @@ interface CommodityCardProps {
 }
 
 export default function CommodityCard({ commodity, showFeatureManagement = false }: CommodityCardProps) {
+  const { toast } = useToast();
   const categoryDetails = commodityCategories.find(cat => cat.id === commodity.categoryId);
   const CategoryIcon = categoryDetails?.icon;
+
+  const handleFeatureListing = () => {
+    // Placeholder: In a real app, this would call a server action
+    // that might involve checks (permissions, payment) and then updates Firestore.
+    console.log(`Attempting to feature commodity: ${commodity.id}, Name: ${commodity.name}`);
+    toast({
+      title: "Feature Listing (Placeholder)",
+      description: `This functionality is not yet fully implemented. You would feature "${commodity.name}".`,
+    });
+    // Example of what a server action call might look like:
+    // toggleCommodityFeatureStatus(commodity.id, commodity.isFeatured || false)
+    //  .then(result => {
+    //    if (result.success) {
+    //      toast({ title: "Success", description: result.message });
+    //      // You might need to re-fetch or update local state here
+    //    } else {
+    //      toast({ variant: "destructive", title: "Error", description: result.message });
+    //    }
+    //  });
+  };
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -29,7 +51,7 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
           data-ai-hint={commodity.dataAiHint || "commodity product"}
         />
         {commodity.isFeatured && (
-          <Badge variant="default" className="absolute top-2 left-2 bg-accent text-accent-foreground shadow-md">
+          <Badge variant="default" className="absolute top-2 left-2 bg-accent text-accent-foreground shadow-md animate-pulse">
             <Star className="mr-1 h-3 w-3" /> Featured
           </Badge>
         )}
@@ -62,7 +84,11 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
               <CheckCircle className="mr-2 h-5 w-5" /> Currently Featured
             </Badge>
           ) : (
-            <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">
+            <Button 
+              variant="outline" 
+              className="w-full border-primary text-primary hover:bg-primary/10"
+              onClick={handleFeatureListing}
+            >
               <PlusCircle className="mr-2 h-5 w-5" /> Feature Listing (Placeholder)
             </Button>
           )
@@ -78,3 +104,4 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
     </Card>
   );
 }
+

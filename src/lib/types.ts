@@ -40,7 +40,7 @@ export interface Commodity {
   location?: string;
   datePosted: string; // ISO string date, from Firestore Timestamp
   externalLink?: string;
-  isFeatured?: boolean;
+  isFeatured?: boolean; // Added for featuring listings
 }
 
 export interface Review {

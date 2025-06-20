@@ -21,6 +21,7 @@ function mapFirestoreDocToCommodity(doc: any): Commodity {
     id: doc.id,
     ...data,
     datePosted: data.datePosted instanceof Timestamp ? data.datePosted.toDate().toISOString() : new Date().toISOString(),
+    isFeatured: data.isFeatured || false, // Ensure isFeatured defaults to false if not present
   } as Commodity;
 }
 
@@ -50,6 +51,7 @@ export async function handleCommodityUpload(
       categoryId: category.id,
       categoryName: category.name, // Denormalize category name
       datePosted: serverTimestamp(),
+      isFeatured: false, // Default new listings to not featured
     };
 
     const docRef = await addDoc(collection(db, 'commodities'), commodityData);
@@ -119,3 +121,18 @@ export async function fetchRecentUserCommodities(userId: string, count: number =
     return [];
   }
 }
+
+// Placeholder for action to toggle feature status - full implementation needs more thought (admin rights, payments, etc.)
+// export async function toggleCommodityFeatureStatus(commodityId: string, currentStatus: boolean): Promise<{success: boolean, message: string}> {
+//   // In a real app, check user permissions (is this user the seller or an admin?)
+//   // If payments are involved, integrate with payment gateway here.
+//   try {
+//     const commodityRef = doc(db, 'commodities', commodityId);
+//     await updateDoc(commodityRef, { isFeatured: !currentStatus });
+//     return { success: true, message: `Commodity feature status updated.`};
+//   } catch (error) {
+//     console.error("Error toggling feature status:", error);
+//     return { success: false, message: "Failed to update feature status."};
+//   }
+// }
+
