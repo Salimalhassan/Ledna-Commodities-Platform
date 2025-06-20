@@ -7,6 +7,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy, limit, doc, updateDoc } from 'firebase/firestore';
 import type { Commodity } from '@/lib/types';
 import { commodityCategories } from '@/data/placeholder'; // To get categoryName
+import { revalidatePath } from 'next/cache';
 
 export interface CommodityActionResult {
   success: boolean;
@@ -55,6 +56,8 @@ export async function handleCommodityUpload(
     };
 
     const docRef = await addDoc(collection(db, 'commodities'), commodityData);
+    revalidatePath('/dashboard/commodities/my-listings');
+    revalidatePath('/dashboard/commodities/find');
     console.log(`Server Action: Commodity "${values.name}" (ID: ${docRef.id}) listed for user ${sellerUid}.`);
     return {
       success: true,
@@ -122,24 +125,18 @@ export async function fetchRecentUserCommodities(userId: string, count: number =
   }
 }
 
-export async function toggleCommodityFeatureStatus(
-  commodityId: string,
-  newFeatureStatus: boolean,
-  paymentProcessed: boolean // For real implementation, this would come from webhook verification
-): Promise<{success: boolean, message: string}> {
-  // In a real app, paymentProcessed would be verified server-side via webhooks,
-  // not just taken as a parameter from the client.
-  if (!paymentProcessed && newFeatureStatus === true) { // Only require payment if trying to feature
-    return { success: false, message: "Payment not processed. Cannot feature listing."};
-  }
 
+export async function unfeatureCommodity(
+  commodityId: string
+): Promise<{success: boolean, message: string}> {
   try {
     const commodityRef = doc(db, 'commodities', commodityId);
-    await updateDoc(commodityRef, { isFeatured: newFeatureStatus });
-    return { success: true, message: `Commodity feature status updated to ${newFeatureStatus ? 'Featured' : 'Not Featured'}.`};
+    await updateDoc(commodityRef, { isFeatured: false });
+    revalidatePath('/dashboard/commodities/my-listings');
+    return { success: true, message: `Commodity has been unfeatured.`};
   } catch (error) {
-    console.error("Error toggling feature status:", error);
+    console.error("Error unfeaturing commodity:", error);
     const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-    return { success: false, message: `Failed to update feature status: ${errorMessage}`};
+    return { success: false, message: `Failed to unfeature commodity: ${errorMessage}`};
   }
 }

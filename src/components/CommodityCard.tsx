@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { DollarSign, MapPin, Eye, Star, PlusCircle, CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { commodityCategories } from '@/data/placeholder'; // For icons
 import { useToast } from '@/hooks/use-toast';
-import { toggleCommodityFeatureStatus } from '@/actions/commodityActions';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -23,7 +22,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { unfeatureCommodity } from '@/actions/commodityActions';
+import { createCheckoutSession } from '@/actions/stripeActions';
+import { loadStripe } from '@stripe/stripe-js';
 
+// Initialize Stripe.js with your publishable key
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface CommodityCardProps {
   commodity: Commodity;
@@ -35,31 +39,27 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
   const { toast } = useToast();
   const categoryDetails = commodityCategories.find(cat => cat.id === commodity.categoryId);
   const CategoryIcon = categoryDetails?.icon;
-  const [isUpdatingFeature, setIsUpdatingFeature] = useState(false);
+  const [isUnfeaturing, setIsUnfeaturing] = useState(false);
+  const [isFeaturing, setIsFeaturing] = useState(false);
 
   // For simulation purposes
-  const FEATURE_PRICE = 5; // e.g., $5 USD
+  const FEATURE_PRICE_USD = 5; // e.g., $5 USD
+  const FEATURE_PRICE_CENTS = FEATURE_PRICE_USD * 100; // Stripe requires price in cents
 
-  const handleToggleFeature = async (makeFeatured: boolean) => {
-    setIsUpdatingFeature(true);
+  const handleUnfeature = async () => {
+    setIsUnfeaturing(true);
     try {
-      // In a real app, this `paymentProcessed` flag would come from a secure server-side check
-      // after interacting with a payment gateway, typically via webhooks.
-      // For simulation, if we are 'featuring', we assume payment was "processed".
-      // If we are 'unfeaturing', payment is not relevant.
-      const paymentProcessed = makeFeatured; 
-
-      const result = await toggleCommodityFeatureStatus(commodity.id, makeFeatured, paymentProcessed);
+      const result = await unfeatureCommodity(commodity.id);
       if (result.success) {
         toast({
           title: "Success",
           description: result.message,
         });
         if (onFeatureStatusChange) {
-          onFeatureStatusChange(commodity.id, makeFeatured);
+          onFeatureStatusChange(commodity.id, false);
         }
       } else {
-        toast({
+         toast({
           variant: "destructive",
           title: "Error",
           description: result.message,
@@ -72,9 +72,48 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
         description: error instanceof Error ? error.message : "Failed to update feature status.",
       });
     } finally {
-      setIsUpdatingFeature(false);
+      setIsUnfeaturing(false);
     }
-  };
+  }
+
+  const handleFeatureRequest = async () => {
+    setIsFeaturing(true);
+    toast({ title: "Redirecting to payment..." });
+
+    try {
+      // 1. Create a checkout session on the server
+      const { sessionId, error } = await createCheckoutSession({
+        commodityId: commodity.id,
+        commodityName: commodity.name,
+        priceInCents: FEATURE_PRICE_CENTS,
+      });
+
+      if (error || !sessionId) {
+        toast({ variant: "destructive", title: "Error", description: error || "Could not create a payment session." });
+        setIsFeaturing(false);
+        return;
+      }
+      
+      // 2. Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (!stripe) {
+        toast({ variant: "destructive", title: "Error", description: "Stripe.js has not loaded yet." });
+        setIsFeaturing(false);
+        return;
+      }
+
+      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId });
+      
+      if (stripeError) {
+         toast({ variant: "destructive", title: "Redirect Failed", description: stripeError.message });
+         setIsFeaturing(false);
+      }
+      // If redirection fails, the user stays on the page and the loading state is turned off.
+    } catch (clientError) {
+      toast({ variant: "destructive", title: "Client Error", description: clientError instanceof Error ? clientError.message : "An unexpected error occurred." });
+      setIsFeaturing(false);
+    }
+  }
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -122,9 +161,9 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
                 <Button 
                   variant="outline" 
                   className="w-full border-destructive text-destructive hover:bg-destructive/10"
-                  disabled={isUpdatingFeature}
+                  disabled={isUnfeaturing}
                 >
-                  {isUpdatingFeature ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <XCircle className="mr-2 h-5 w-5" />}
+                  {isUnfeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <XCircle className="mr-2 h-s w-5" />}
                   Unfeature Listing
                 </Button>
               </AlertDialogTrigger>
@@ -137,9 +176,9 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isUpdatingFeature}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleToggleFeature(false)} disabled={isUpdatingFeature} className="bg-destructive hover:bg-destructive/90">
-                    {isUpdatingFeature ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  <AlertDialogCancel disabled={isUnfeaturing}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleUnfeature} disabled={isUnfeaturing} className="bg-destructive hover:bg-destructive/90">
+                    {isUnfeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     Yes, Unfeature
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -151,9 +190,9 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
                 <Button 
                   variant="outline" 
                   className="w-full border-primary text-primary hover:bg-primary/10"
-                  disabled={isUpdatingFeature}
+                  disabled={isFeaturing}
                 >
-                  {isUpdatingFeature ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <PlusCircle className="mr-2 h-5 w-5" />}
+                  {isFeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <PlusCircle className="mr-2 h-5 w-5" />}
                   Feature Listing
                 </Button>
               </AlertDialogTrigger>
@@ -162,18 +201,14 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
                   <AlertDialogTitle>Feature Your Listing?</AlertDialogTitle>
                   <AlertDialogDescription>
                     Make "{commodity.name}" a featured listing to increase its visibility.
-                    This service costs ${FEATURE_PRICE} (simulated). Do you want to proceed?
-                    <br/><br/>
-                    <span className="text-xs text-muted-foreground">
-                      (Note: This is a simulated payment. No real charges will occur. Clicking 'Yes, Feature' will mark the item as featured.)
-                    </span>
+                    This service costs ${FEATURE_PRICE_USD}. Clicking 'Proceed to Payment' will redirect you to our secure payment processor.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isUpdatingFeature}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleToggleFeature(true)} disabled={isUpdatingFeature} className="bg-primary hover:bg-primary/90">
-                     {isUpdatingFeature ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Yes, Feature for ${FEATURE_PRICE}
+                  <AlertDialogCancel disabled={isFeaturing}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleFeatureRequest} disabled={isFeaturing} className="bg-primary hover:bg-primary/90">
+                     {isFeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    Proceed to Payment (${FEATURE_PRICE_USD})
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
