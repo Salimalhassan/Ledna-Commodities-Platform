@@ -7,17 +7,39 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart, Search, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { sampleCommodities, sampleUsers } from "@/data/placeholder"; // MyListings/BuyerDashboard will still use some placeholders
-import type { User } from "@/lib/types";
+import { sampleUsers } from "@/data/placeholder"; // sampleUsers kept for BuyerDashboard's Potential Sellers
+import type { User, Commodity } from "@/lib/types";
 import SellerPreviewCard from "@/components/SellerPreviewCard";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+import { fetchRecentUserCommodities } from "@/actions/commodityActions"; // Import the new action
+import { useToast } from "@/hooks/use-toast";
 
 // Seller Dashboard Content
 function SellerDashboard({ user }: { user: User }) {
-  // TODO: Replace sampleCommodities with actual data fetched for this user
-  const userCommodities = sampleCommodities.filter(c => c.sellerId === user.uid || c.sellerId === 'placeholder-seller-bob' || c.sellerId === 'placeholder-seller-carol'); // Temporary fallback
+  const [userCommodities, setUserCommodities] = useState<Commodity[]>([]);
+  const [isLoadingCommodities, setIsLoadingCommodities] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function loadRecentCommodities() {
+      if (user?.uid) {
+        setIsLoadingCommodities(true);
+        try {
+          const fetchedCommodities = await fetchRecentUserCommodities(user.uid, 3);
+          setUserCommodities(fetchedCommodities);
+        } catch (error) {
+          console.error("Failed to fetch recent commodities:", error);
+          toast({ variant: "destructive", title: "Error", description: "Could not load recent listings." });
+        } finally {
+          setIsLoadingCommodities(false);
+        }
+      }
+    }
+    loadRecentCommodities();
+  }, [user?.uid, toast]);
 
   const profileCompletion = [
     user.name, user.email, user.phone, user.location, user.address, user.city, user.country, user.avatarUrl
@@ -25,12 +47,11 @@ function SellerDashboard({ user }: { user: User }) {
   const totalProfileFields = 8;
   const completionPercentage = Math.round((profileCompletion / totalProfileFields) * 100);
 
-
   const quickStats = [
-    { title: "Active Listings", value: userCommodities.length, icon: <List className="h-6 w-6 text-primary" />, color: "text-primary" },
+    { title: "Active Listings", value: userCommodities.length, icon: <List className="h-6 w-6 text-primary" />, color: "text-primary" }, // Will update when full listings count is fetched
     { title: "Profile Completion", value: completionPercentage, icon: <UserCircle className="h-6 w-6 text-green-500" />, unit: "%", color: "text-green-500" },
-    { title: "Total Sales (Mock)", value: 1250, icon: <DollarSign className="h-6 w-6 text-blue-500" />, unit: "USD", color: "text-blue-500" },
-    { title: "Average Rating (Mock)", value: 4.5, icon: <Star className="h-6 w-6 text-yellow-500" />, unit: "/5", color: "text-yellow-500" },
+    { title: "Total Sales (Mock)", value: 0, icon: <DollarSign className="h-6 w-6 text-blue-500" />, unit: "USD", color: "text-blue-500" }, // Replace with actual data
+    { title: "Average Rating (Mock)", value: 0, icon: <Star className="h-6 w-6 text-yellow-500" />, unit: "/5", color: "text-yellow-500" }, // Replace with actual data
   ];
 
   return (
@@ -55,18 +76,31 @@ function SellerDashboard({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle className="font-headline">Recent Listings (Placeholder)</CardTitle>
+              <CardTitle className="font-headline">Recent Listings</CardTitle>
               <CardDescription>Your most recently added commodities.</CardDescription>
             </CardHeader>
             <CardContent>
-              {userCommodities.length > 0 ? (
+              {isLoadingCommodities ? (
+                 <ul className="space-y-4">
+                    {[...Array(3)].map((_, i) => (
+                        <li key={i} className="flex items-center gap-4 p-3 border rounded-lg">
+                            <Skeleton className="h-[60px] w-[60px] rounded-md" />
+                            <div className="flex-1 space-y-2">
+                                <Skeleton className="h-5 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </div>
+                            <Skeleton className="h-8 w-16 rounded-md" />
+                        </li>
+                    ))}
+                </ul>
+              ) : userCommodities.length > 0 ? (
                 <ul className="space-y-4">
-                  {userCommodities.slice(0, 3).map(commodity => (
+                  {userCommodities.map(commodity => (
                     <li key={commodity.id} className="flex items-center gap-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
                       <Image src={commodity.imageUrl || 'https://placehold.co/80x80.png'} alt={commodity.name} width={60} height={60} className="rounded-md object-cover" data-ai-hint={commodity.dataAiHint || "commodity item"} />
                       <div className="flex-1">
                         <h3 className="font-semibold">{commodity.name}</h3>
-                        <p className="text-sm text-muted-foreground">{commodity.category.name} - ${commodity.price}/{commodity.unit}</p>
+                        <p className="text-sm text-muted-foreground">{commodity.categoryName} - ${commodity.price}/{commodity.unit}</p>
                       </div>
                       <Button variant="outline" size="sm" asChild>
                         <Link href={`/dashboard/commodities/my-listings`}>View</Link>
@@ -116,7 +150,7 @@ function SellerDashboard({ user }: { user: User }) {
 
 // Buyer Dashboard Content
 function BuyerDashboard({ user }: { user: User }) {
-  // TODO: Fetch actual sellers from Firestore
+  // TODO: Fetch actual sellers from Firestore or implement a proper seller discovery mechanism
   const potentialSellers = sampleUsers.filter(u => u.userType === 'seller');
 
   return (
@@ -133,15 +167,17 @@ function BuyerDashboard({ user }: { user: User }) {
         <CardContent>
           <div className="flex gap-2">
             <Input type="search" placeholder="Search by commodity name, category, etc..." className="flex-grow" />
-            <Button>Search</Button>
+            <Button onClick={() => alert("Search functionality will take you to 'Find Commodities' page.")} asChild>
+                <Link href="/dashboard/commodities/find">Search</Link>
+            </Button>
           </div>
-           <p className="text-xs text-muted-foreground mt-2">Tip: Try searching for "Maize", "Organic", or "Fruits". (Search functionality is a placeholder).</p>
+           <p className="text-xs text-muted-foreground mt-2">Tip: Click search to browse all available commodities.</p>
         </CardContent>
       </Card>
 
       <section>
         <h2 className="text-2xl font-bold mb-6 font-headline flex items-center">
-          <Users className="mr-3 h-7 w-7 text-primary" /> Potential Sellers (Placeholder)
+          <Users className="mr-3 h-7 w-7 text-primary" /> Featured Sellers (Placeholder)
         </h2>
         {potentialSellers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -172,7 +208,6 @@ export default function DashboardPage() {
   }
 
   if (!currentUser) {
-    // This should ideally be handled by ProtectedRoute, but as a fallback:
     return (
       <div className="container mx-auto py-8 px-4 md:px-6">
         <p>Please log in to view the dashboard.</p>

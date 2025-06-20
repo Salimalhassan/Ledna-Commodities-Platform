@@ -1,35 +1,81 @@
 
-'use client'; // Required for client-side hooks
+'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { sampleTransactions } from "@/data/placeholder"; // Still using placeholder
 import { ShoppingCart, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import type { Transaction } from "@/lib/types";
+import { fetchUserTransactions } from "@/actions/transactionActions";
+import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function BuyerTransactionsPage() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [isLoadingTransactions, setIsLoadingTransactions] = useState(true);
 
-  // TODO: In a real app, transactions would be fetched from Firestore filtered by buyerId (currentUser.uid)
-  const transactions = sampleTransactions; // Using placeholder for now
+  useEffect(() => {
+    async function loadTransactions() {
+      if (currentUser?.uid && currentUser.userType === 'buyer') {
+        setIsLoadingTransactions(true);
+        try {
+          const fetchedTransactions = await fetchUserTransactions(currentUser.uid);
+          setTransactions(fetchedTransactions);
+        } catch (error) {
+          console.error("Failed to fetch transactions:", error);
+          toast({ variant: "destructive", title: "Error", description: "Could not load your transactions." });
+        } finally {
+          setIsLoadingTransactions(false);
+        }
+      } else if (currentUser && currentUser.userType !== 'buyer') {
+         setIsLoadingTransactions(false);
+      } else if (!currentUser && !authLoading) {
+         setIsLoadingTransactions(false);
+      }
+    }
+     if (!authLoading) {
+        loadTransactions();
+    }
+  }, [currentUser, authLoading, toast]);
 
-  if (loading) {
+  if (authLoading || (currentUser?.userType === 'buyer' && isLoadingTransactions && transactions.length === 0)) {
     return (
-      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
-        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
-        <p>Loading your transactions...</p>
+      <div className="container mx-auto py-8 px-4 md:px-6">
+        <Skeleton className="h-9 w-1/2 mb-8" />
+        <Card className="shadow-xl">
+          <CardHeader>
+            <Skeleton className="h-7 w-1/3 mb-2" />
+            <Skeleton className="h-4 w-1/2" />
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="flex justify-between items-center p-2 border-b">
+                  <div className="space-y-1">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-60" />
+                  </div>
+                  <Skeleton className="h-6 w-20" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   if (!currentUser) {
-    router.push('/auth/login'); // Should be handled by ProtectedRoute
+    router.push('/auth/login');
     return null;
   }
 
@@ -46,11 +92,10 @@ export default function BuyerTransactionsPage() {
     );
   }
 
-
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <h1 className="text-3xl font-bold mb-8 font-headline flex items-center">
-        <ShoppingCart className="mr-3 h-8 w-8 text-primary" /> My Transaction History (Placeholder Data)
+        <ShoppingCart className="mr-3 h-8 w-8 text-primary" /> My Transaction History
       </h1>
       <Card className="shadow-xl">
         <CardHeader>
@@ -58,7 +103,12 @@ export default function BuyerTransactionsPage() {
           <CardDescription>Review your previous commodity purchases.</CardDescription>
         </CardHeader>
         <CardContent>
-          {transactions.length > 0 ? (
+          {isLoadingTransactions && transactions.length === 0 ? (
+             <div className="text-center py-12">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
+                <p>Loading your transactions...</p>
+            </div>
+          ) : transactions.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>

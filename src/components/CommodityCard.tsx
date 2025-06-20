@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { DollarSign, MapPin, Eye, Star, PlusCircle, CheckCircle } from 'lucide-react';
+import { commodityCategories } from '@/data/placeholder'; // For icons
 
 interface CommodityCardProps {
   commodity: Commodity;
@@ -13,7 +14,9 @@ interface CommodityCardProps {
 }
 
 export default function CommodityCard({ commodity, showFeatureManagement = false }: CommodityCardProps) {
-  const CategoryIcon = commodity.category.icon;
+  const categoryDetails = commodityCategories.find(cat => cat.id === commodity.categoryId);
+  const CategoryIcon = categoryDetails?.icon;
+
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
       <CardHeader className="p-0 relative">
@@ -32,7 +35,7 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
         )}
          {CategoryIcon && (
           <Badge variant="default" className="absolute top-2 right-2 bg-primary/80 text-primary-foreground backdrop-blur-sm">
-            <CategoryIcon className="mr-1 h-4 w-4" /> {commodity.category.name}
+            <CategoryIcon className="mr-1 h-4 w-4" /> {commodity.categoryName}
           </Badge>
         )}
       </CardHeader>
@@ -64,9 +67,10 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
             </Button>
           )
         ) : (
+          // For general commodity cards, link to the seller's public profile
           <Button asChild className="w-full">
             <Link href={`/sellers/${commodity.sellerId}`}>
-              <Eye className="mr-2 h-4 w-4" /> View Seller Profile
+              <Eye className="mr-2 h-4 w-4" /> View Seller: {commodity.sellerName}
             </Link>
           </Button>
         )}

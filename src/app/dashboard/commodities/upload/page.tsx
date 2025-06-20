@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CommodityUploadSchema } from '@/lib/schemas';
-import { commodityCategories } from '@/data/placeholder'; // Still use placeholder categories for now
+import { commodityCategories } from '@/data/placeholder';
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -28,7 +28,7 @@ export default function CommodityUploadPage() {
 
   const form = useForm<z.infer<typeof CommodityUploadSchema>>({
     resolver: zodResolver(CommodityUploadSchema),
-    defaultValues: { // Default values will be updated by useEffect if currentUser exists
+    defaultValues: {
       name: '',
       description: '',
       categoryId: '',
@@ -44,7 +44,7 @@ export default function CommodityUploadPage() {
   useEffect(() => {
     if (currentUser && !authLoading) {
       form.reset({
-        ...form.getValues(), // Keep existing form values if any
+        ...form.getValues(),
         sellerContact: currentUser.phone || '',
         location: currentUser.city && currentUser.country ? `${currentUser.city}, ${currentUser.country}` : currentUser.location || '',
       });
@@ -53,8 +53,8 @@ export default function CommodityUploadPage() {
 
 
   async function onSubmit(values: z.infer<typeof CommodityUploadSchema>) {
-    if (!currentUser?.uid) {
-      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to list a commodity.' });
+    if (!currentUser?.uid || !currentUser.name) {
+      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in and have a name set to list a commodity.' });
       return;
     }
     if (currentUser.userType !== 'seller') {
@@ -64,8 +64,7 @@ export default function CommodityUploadPage() {
 
     setIsSubmitting(true);
     try {
-      // Pass currentUser.uid as sellerUid
-      const result = await handleCommodityUpload(currentUser.uid, values);
+      const result = await handleCommodityUpload(currentUser.uid, currentUser.name, values);
       if (result.success) {
         toast({
           title: 'Commodity Submitted',

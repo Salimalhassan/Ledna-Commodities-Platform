@@ -1,6 +1,8 @@
 
+'use client';
+
 import Image from 'next/image';
-import { sampleUsers, sampleCommodities, sampleReviews } from '@/data/placeholder';
+import { sampleUsers, commodityCategories } from '@/data/placeholder'; // Keep sampleUsers for seller profile, commodityCategories for icons
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -8,12 +10,92 @@ import CommodityCard from '@/components/CommodityCard';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PublicHeader from '@/components/layout/PublicHeader';
-import { Mail, MapPin, Phone, ShieldCheck, Star, Lock } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, Star, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import type { User, Commodity, Review } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { fetchCommoditiesBySellerId } from '@/actions/commodityActions';
+import { fetchReviewsBySellerId } from '@/actions/reviewActions';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SellerProfilePage({ params }: { params: { sellerId: string } }) {
-  const seller = sampleUsers.find(u => u.id === params.sellerId);
+  const { toast } = useToast();
+  const [seller, setSeller] = useState<User | null>(null);
+  const [sellerCommodities, setSellerCommodities] = useState<Commodity[]>([]);
+  const [sellerReviews, setSellerReviews] = useState<Review[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadSellerData() {
+      setIsLoading(true);
+      try {
+        // Fetch seller profile
+        const sellerDocRef = doc(db, 'users', params.sellerId);
+        const sellerDocSnap = await getDoc(sellerDocRef);
+
+        if (sellerDocSnap.exists()) {
+          setSeller({ uid: sellerDocSnap.id, ...sellerDocSnap.data() } as User);
+          
+          // Fetch commodities and reviews in parallel
+          const [commodities, reviews] = await Promise.all([
+            fetchCommoditiesBySellerId(params.sellerId),
+            fetchReviewsBySellerId(params.sellerId)
+          ]);
+          setSellerCommodities(commodities);
+          setSellerReviews(reviews);
+
+        } else {
+          toast({ variant: "destructive", title: "Error", description: "Seller not found." });
+          setSeller(null); // Explicitly set to null if not found
+        }
+      } catch (error) {
+        console.error("Failed to load seller data:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load seller information." });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    if (params.sellerId) {
+      loadSellerData();
+    }
+  }, [params.sellerId, toast]);
+
+  if (isLoading) {
+    return (
+      <>
+        <PublicHeader />
+        <main className="container mx-auto py-8 px-4 md:px-6">
+          <Card className="mb-8 shadow-xl overflow-hidden">
+            <Skeleton className="h-48 w-full" />
+            <CardContent className="p-6 pt-0 relative">
+              <div className="flex flex-col md:flex-row items-center md:items-end -mt-16 md:-mt-20 space-y-4 md:space-y-0 md:space-x-6">
+                <Skeleton className="h-32 w-32 md:h-40 md:w-40 rounded-full border-4 border-background shadow-lg" />
+                <div className="flex-1 text-center md:text-left pt-4">
+                  <Skeleton className="h-9 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-1/4 mb-1" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+                <Skeleton className="h-10 w-24" />
+              </div>
+              <div className="mt-6 border-t pt-6 space-y-4">
+                <Skeleton className="h-24 w-full" />
+                 <Skeleton className="h-5 w-3/4 mb-1" />
+                 <Skeleton className="h-5 w-2/3" />
+              </div>
+            </CardContent>
+          </Card>
+          <Skeleton className="h-8 w-1/3 mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[...Array(4)].map((_,i) => <Skeleton key={i} className="h-80 w-full rounded-lg" />)}
+          </div>
+        </main>
+      </>
+    );
+  }
 
   if (!seller) {
     return (
@@ -21,7 +103,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
         <PublicHeader />
         <div className="container mx-auto py-12 text-center">
           <h1 className="text-2xl font-bold">Seller Not Found</h1>
-          <p className="text-muted-foreground">The seller you are looking for does not exist.</p>
+          <p className="text-muted-foreground">The seller you are looking for does not exist or could not be loaded.</p>
           <Button asChild className="mt-4">
             <Link href="/">Go to Homepage</Link>
           </Button>
@@ -30,8 +112,6 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
     );
   }
 
-  const sellerCommodities = sampleCommodities.filter(c => c.sellerId === seller.id);
-  const sellerReviews = sampleReviews.filter(r => r.sellerId === seller.id);
   const averageRating = sellerReviews.length > 0
     ? sellerReviews.reduce((acc, r) => acc + r.rating, 0) / sellerReviews.length
     : 0;
@@ -44,7 +124,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
         <Card className="mb-8 shadow-xl overflow-hidden">
           <div className="relative h-48 bg-gradient-to-r from-primary/20 to-accent/20">
              <Image
-                src="https://placehold.co/1200x300.png"
+                src="https://placehold.co/1200x300.png" // Keep placeholder cover, or allow seller to set one
                 alt={`${seller.name}'s cover photo`}
                 fill
                 style={{objectFit: 'cover'}}
@@ -82,15 +162,15 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                 <Lock className="h-5 w-5 text-primary" />
                 <AlertTitle className="font-headline text-primary">Connect with {seller.name}</AlertTitle>
                 <AlertDescription className="text-primary/80">
-                  Good news! Your first 3 seller contacts on Ledna are free. This allows you to view full details and initiate conversations. After your free contacts are used, a premium subscription will be needed to continue connecting with new sellers. (This is a placeholder for monetization and free trial tracking).
+                  (Placeholder for contact logic) Good news! Your first 3 seller contacts on Ledna are free. This allows you to view full details and initiate conversations. After your free contacts are used, a premium subscription will be needed to continue connecting with new sellers.
                 </AlertDescription>
-                <Button className="mt-3">Contact {seller.name}</Button>
+                <Button className="mt-3">Contact {seller.name} (Placeholder)</Button>
               </Alert>
 
               <div className="space-y-2 text-sm text-foreground/80">
-                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email hidden - Contact seller to view</span></p>
-                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone hidden - Contact seller to view</span></p>}
-                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Full address hidden - Contact seller to view ({seller.city}, {seller.country})</span></p>}
+                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email: {seller.email || "Not available"}</span></p>
+                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone: {seller.phone}</span></p>}
+                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Address: {seller.address}, {seller.city}, {seller.country}</span></p>}
               </div>
             </div>
           </CardContent>

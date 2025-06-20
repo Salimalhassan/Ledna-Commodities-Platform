@@ -1,39 +1,80 @@
 
-'use client'; // Required for client-side hooks
+'use client';
 
 import CommodityCard from '@/components/CommodityCard';
 import { Button } from '@/components/ui/button';
-import { sampleCommodities } from '@/data/placeholder'; // Still using placeholder for now
 import { PlusCircle, PackageSearch, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import type { Commodity } from '@/lib/types';
+import { fetchUserCommodities } from '@/actions/commodityActions';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
+
 
 export default function MyListingsPage() {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+  const [userCommodities, setUserCommodities] = useState<Commodity[]>([]);
+  const [isLoadingCommodities, setIsLoadingCommodities] = useState(true);
 
-  // TODO: In a real app, fetch commodities from Firestore filtered by currentUser.uid
-  // For now, filter placeholder data if currentUser matches a placeholder seller
-  // This is a temporary measure until commodities are stored in Firestore.
-  const userCommodities = currentUser
-    ? sampleCommodities.filter(c => c.sellerId === currentUser.uid || 
-        (currentUser.uid === 'placeholder-seller-bob' && c.sellerId === 'placeholder-seller-bob') ||
-        (currentUser.uid === 'placeholder-seller-carol' && c.sellerId === 'placeholder-seller-carol')
-      )
-    : [];
+  useEffect(() => {
+    async function loadUserCommodities() {
+      if (currentUser?.uid && currentUser.userType === 'seller') {
+        setIsLoadingCommodities(true);
+        try {
+          const fetchedCommodities = await fetchUserCommodities(currentUser.uid);
+          setUserCommodities(fetchedCommodities);
+        } catch (error) {
+          console.error("Failed to fetch user commodities:", error);
+          toast({ variant: "destructive", title: "Error", description: "Could not load your listings." });
+        } finally {
+          setIsLoadingCommodities(false);
+        }
+      } else if (currentUser && currentUser.userType !== 'seller') {
+        setIsLoadingCommodities(false); // Not a seller, no commodities to load
+      } else if (!currentUser && !authLoading) {
+         setIsLoadingCommodities(false); // Not logged in
+      }
+    }
 
-  if (loading) {
+    if (!authLoading) {
+        loadUserCommodities();
+    }
+  }, [currentUser, authLoading, toast]);
+
+  if (authLoading || (currentUser?.userType === 'seller' && isLoadingCommodities && userCommodities.length === 0) ) {
     return (
-      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
-        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
-        <p>Loading your listings...</p>
+      <div className="container mx-auto py-8 px-4 md:px-6">
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 md:gap-0">
+          <Skeleton className="h-9 w-3/5" />
+          <Skeleton className="h-10 w-48" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           {[...Array(4)].map((_, i) => (
+            <Card key={i} className="overflow-hidden shadow-lg flex flex-col h-full">
+              <Skeleton className="w-full h-48" />
+              <CardContent className="p-4 flex-grow">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-full mb-1" />
+                <Skeleton className="h-4 w-full mb-3" />
+                <Skeleton className="h-5 w-1/2" />
+              </CardContent>
+              <CardFooter className="p-4 border-t">
+                <Skeleton className="h-10 w-full" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
       </div>
     );
   }
 
   if (!currentUser) {
-    // Should be caught by ProtectedRoute, but good to have a fallback.
     router.push('/auth/login');
     return null;
   }
@@ -55,7 +96,7 @@ export default function MyListingsPage() {
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 md:gap-0">
-        <h1 className="text-3xl font-bold font-headline">My Commodity Listings (Placeholder Data)</h1>
+        <h1 className="text-3xl font-bold font-headline">My Commodity Listings</h1>
         <Button asChild>
           <Link href="/dashboard/commodities/upload">
             <PlusCircle className="mr-2 h-5 w-5" /> Add New Listing
@@ -63,7 +104,24 @@ export default function MyListingsPage() {
         </Button>
       </div>
 
-      {userCommodities.length > 0 ? (
+      {isLoadingCommodities && userCommodities.length === 0 ? (
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+           {[...Array(4)].map((_, i) => (
+             <Card key={i} className="overflow-hidden shadow-lg flex flex-col h-full">
+               <Skeleton className="w-full h-48" />
+               <CardContent className="p-4 flex-grow">
+                 <Skeleton className="h-6 w-3/4 mb-2" />
+                 <Skeleton className="h-4 w-full mb-1" />
+                 <Skeleton className="h-4 w-full mb-3" />
+                 <Skeleton className="h-5 w-1/2" />
+               </CardContent>
+               <CardFooter className="p-4 border-t">
+                 <Skeleton className="h-10 w-full" />
+               </CardFooter>
+             </Card>
+           ))}
+         </div>
+      ) : userCommodities.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {userCommodities.map((commodity) => (
             <CommodityCard key={commodity.id} commodity={commodity} showFeatureManagement={true} />
@@ -81,26 +139,4 @@ export default function MyListingsPage() {
       )}
     </div>
   );
-}
-
-function PackageIcon(props: React.SVGProps<SVGSVGElement>) { // Keep for now if used elsewhere, or remove if not.
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m7.5 4.27 9 5.15" />
-      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-      <path d="m3.3 7 8.7 5 8.7-5" />
-      <path d="M12 22V12" />
-    </svg>
-  )
 }

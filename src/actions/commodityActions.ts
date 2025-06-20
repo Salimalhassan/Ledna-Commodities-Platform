@@ -3,9 +3,10 @@
 
 import type * as z from 'zod';
 import type { CommodityUploadSchema } from '@/lib/schemas';
-// Firebase related imports will be needed when saving to Firestore
-// import { db } from '@/lib/firebase';
-// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy, limit } from 'firebase/firestore';
+import type { Commodity } from '@/lib/types';
+import { commodityCategories } from '@/data/placeholder'; // To get categoryName
 
 export interface CommodityActionResult {
   success: boolean;
@@ -14,8 +15,18 @@ export interface CommodityActionResult {
   commodityId?: string;
 }
 
+function mapFirestoreDocToCommodity(doc: any): Commodity {
+  const data = doc.data();
+  return {
+    id: doc.id,
+    ...data,
+    datePosted: data.datePosted instanceof Timestamp ? data.datePosted.toDate().toISOString() : new Date().toISOString(),
+  } as Commodity;
+}
+
 export async function handleCommodityUpload(
-  sellerUid: string, // Seller's Firebase UID
+  sellerUid: string,
+  sellerName: string, // Pass sellerName for denormalization
   values: z.infer<typeof CommodityUploadSchema>
 ): Promise<CommodityActionResult> {
   if (!sellerUid) {
@@ -26,27 +37,21 @@ export async function handleCommodityUpload(
     };
   }
 
-  console.log(`Server Action: User ${sellerUid} attempting to upload commodity:`);
-  console.log(values);
+  const category = commodityCategories.find(c => c.id === values.categoryId);
+  if (!category) {
+    return { success: false, message: 'Invalid category selected.', error: 'Category not found.' };
+  }
 
-  // Simulate backend processing
-  await new Promise(resolve => setTimeout(resolve, 1500));
-
-  // Placeholder: In a real backend, you would:
-  // 1. Validate data again (though client-side Zod helps)
-  // 2. Prepare commodity data, including sellerUid as sellerId
-  /*
-  const commodityData = {
-    ...values,
-    sellerId: sellerUid,
-    sellerName: "Fetched from user profile", // You'd fetch this or pass it
-    datePosted: serverTimestamp(), // Use Firestore server timestamp
-    // category: findCategoryObjectById(values.categoryId) // Map categoryId to full object
-  };
-  */
-  // 3. Save to Firestore `commodities` collection
-  /*
   try {
+    const commodityData = {
+      ...values,
+      sellerId: sellerUid,
+      sellerName: sellerName,
+      categoryId: category.id,
+      categoryName: category.name, // Denormalize category name
+      datePosted: serverTimestamp(),
+    };
+
     const docRef = await addDoc(collection(db, 'commodities'), commodityData);
     console.log(`Server Action: Commodity "${values.name}" (ID: ${docRef.id}) listed for user ${sellerUid}.`);
     return {
@@ -62,15 +67,55 @@ export async function handleCommodityUpload(
       error: e instanceof Error ? e.message : "An unknown error occurred."
     };
   }
-  */
+}
 
-  // Current placeholder success as Firestore isn't fully implemented for commodities yet
-  const newCommodityId = `com-placeholder-${Date.now()}`;
-  console.log(`Server Action: Commodity "${values.name}" (placeholder ID: ${newCommodityId}) processed for user ${sellerUid}. Backend storage pending.`);
+export async function fetchCommodities(): Promise<Commodity[]> {
+  try {
+    const commoditiesCol = collection(db, 'commodities');
+    const q = query(commoditiesCol, orderBy('datePosted', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => mapFirestoreDocToCommodity(doc));
+  } catch (error) {
+    console.error("Error fetching commodities:", error);
+    return [];
+  }
+}
 
-  return {
-    success: true,
-    message: `Commodity "${values.name}" has been processed by the backend (data logged, not stored yet).`,
-    commodityId: newCommodityId,
-  };
+export async function fetchUserCommodities(userId: string): Promise<Commodity[]> {
+  if (!userId) return [];
+  try {
+    const commoditiesCol = collection(db, 'commodities');
+    const q = query(commoditiesCol, where('sellerId', '==', userId), orderBy('datePosted', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => mapFirestoreDocToCommodity(doc));
+  } catch (error) {
+    console.error("Error fetching user commodities:", error);
+    return [];
+  }
+}
+
+export async function fetchCommoditiesBySellerId(sellerId: string): Promise<Commodity[]> {
+  if (!sellerId) return [];
+  try {
+    const commoditiesCol = collection(db, 'commodities');
+    const q = query(commoditiesCol, where('sellerId', '==', sellerId), orderBy('datePosted', 'desc'));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => mapFirestoreDocToCommodity(doc));
+  } catch (error) {
+    console.error("Error fetching commodities by seller ID:", error);
+    return [];
+  }
+}
+
+export async function fetchRecentUserCommodities(userId: string, count: number = 3): Promise<Commodity[]> {
+  if (!userId) return [];
+  try {
+    const commoditiesCol = collection(db, 'commodities');
+    const q = query(commoditiesCol, where('sellerId', '==', userId), orderBy('datePosted', 'desc'), limit(count));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(doc => mapFirestoreDocToCommodity(doc));
+  } catch (error) {
+    console.error("Error fetching recent user commodities:", error);
+    return [];
+  }
 }
