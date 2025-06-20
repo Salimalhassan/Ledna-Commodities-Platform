@@ -2,7 +2,6 @@
 'use client';
 
 import Image from 'next/image';
-import { sampleUsers, commodityCategories } from '@/data/placeholder'; // Keep sampleUsers for seller profile, commodityCategories for icons
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -10,24 +9,38 @@ import CommodityCard from '@/components/CommodityCard';
 import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PublicHeader from '@/components/layout/PublicHeader';
+import AddReviewForm from '@/components/AddReviewForm';
 import { Mail, MapPin, Phone, ShieldCheck, Star, Lock, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { User, Commodity, Review } from '@/lib/types';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { fetchCommoditiesBySellerId } from '@/actions/commodityActions';
 import { fetchReviewsBySellerId } from '@/actions/reviewActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/context/AuthContext';
+
 
 export default function SellerProfilePage({ params }: { params: { sellerId: string } }) {
   const { toast } = useToast();
+  const { currentUser } = useAuth();
   const [seller, setSeller] = useState<User | null>(null);
   const [sellerCommodities, setSellerCommodities] = useState<Commodity[]>([]);
   const [sellerReviews, setSellerReviews] = useState<Review[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const loadSellerReviews = useCallback(async () => {
+    try {
+      const reviews = await fetchReviewsBySellerId(params.sellerId);
+      setSellerReviews(reviews);
+    } catch (error) {
+       console.error("Failed to re-fetch reviews:", error);
+       toast({ variant: "destructive", title: "Error", description: "Could not refresh reviews list." });
+    }
+  }, [params.sellerId, toast]);
 
   useEffect(() => {
     async function loadSellerData() {
@@ -50,7 +63,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
 
         } else {
           toast({ variant: "destructive", title: "Error", description: "Seller not found." });
-          setSeller(null); // Explicitly set to null if not found
+          setSeller(null);
         }
       } catch (error) {
         console.error("Failed to load seller data:", error);
@@ -116,6 +129,8 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
     ? sellerReviews.reduce((acc, r) => acc + r.rating, 0) / sellerReviews.length
     : 0;
   const sellerInitials = seller.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const canLeaveReview = currentUser && currentUser.userType === 'buyer' && currentUser.uid !== seller.uid;
+
 
   return (
     <>
@@ -124,7 +139,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
         <Card className="mb-8 shadow-xl overflow-hidden">
           <div className="relative h-48 bg-gradient-to-r from-primary/20 to-accent/20">
              <Image
-                src="https://placehold.co/1200x300.png" // Keep placeholder cover, or allow seller to set one
+                src="https://placehold.co/1200x300.png" 
                 alt={`${seller.name}'s cover photo`}
                 fill
                 style={{objectFit: 'cover'}}
@@ -191,6 +206,11 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
 
         <section>
           <h2 className="text-2xl font-bold mb-6 font-headline">Seller Reputation & Reviews</h2>
+
+          {canLeaveReview && (
+            <AddReviewForm sellerId={params.sellerId} onReviewSubmit={loadSellerReviews} />
+          )}
+
           {sellerReviews.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {sellerReviews.map((review) => (

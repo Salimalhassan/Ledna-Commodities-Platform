@@ -4,6 +4,7 @@
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy } from 'firebase/firestore';
 import type { Review } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 export interface ReviewActionResult {
   success: boolean;
@@ -43,6 +44,7 @@ export async function addReview(input: AddReviewInput): Promise<ReviewActionResu
       date: serverTimestamp(),
     };
     const docRef = await addDoc(collection(db, 'reviews'), reviewData);
+    revalidatePath(`/sellers/${input.sellerId}`);
     return {
       success: true,
       message: "Review submitted successfully.",

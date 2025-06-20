@@ -12,7 +12,7 @@ export const SignupSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
   userType: z.enum(['seller', 'buyer'], { required_error: "Please select your role." }),
-  primarySpokenLanguage: z.string().min(2, {message: "Language name should be at least 2 characters."}).optional().or(z.literal('')), // Added field
+  primarySpokenLanguage: z.string().min(2, {message: "Language name should be at least 2 characters."}).optional().or(z.literal('')),
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match.",
   path: ["confirmPassword"],
@@ -44,4 +44,9 @@ export const CommodityUploadSchema = z.object({
   sellerContact: z.string().optional(),
   location: z.string().optional(),
   externalLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+});
+
+export const ReviewSchema = z.object({
+  rating: z.number().min(1, { message: "Rating is required." }).max(5),
+  comment: z.string().min(10, { message: "Comment must be at least 10 characters." }).max(500, { message: "Comment cannot exceed 500 characters." }),
 });
