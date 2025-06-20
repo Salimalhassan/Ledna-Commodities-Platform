@@ -50,3 +50,16 @@ export const ReviewSchema = z.object({
   rating: z.number().min(1, { message: "Rating is required." }).max(5),
   comment: z.string().min(10, { message: "Comment must be at least 10 characters." }).max(500, { message: "Comment cannot exceed 500 characters." }),
 });
+
+
+// Schema for AI-generated market trend data points
+export const MarketTrendDataPointSchema = z.object({
+  date: z.string().describe("The date for the data point, in 'YYYY-MM-DD' format."),
+  price: z.number().describe("The average price of the commodity on that date."),
+});
+
+// Schema for the entire market trend object, for AI output validation
+export const MarketTrendSchema = z.object({
+  commodityName: z.string().describe("The name of the commodity."),
+  data: z.array(MarketTrendDataPointSchema).describe("An array of 7 data points for the last 7 months."),
+});
