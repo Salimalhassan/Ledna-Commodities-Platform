@@ -2,7 +2,7 @@
 import type { LucideIcon } from 'lucide-react';
 
 export interface User {
-  id: string;
+  uid: string; // Changed from id to uid to align with Firebase Auth
   name: string;
   email: string;
   avatarUrl?: string;
@@ -15,7 +15,7 @@ export interface User {
   verificationType?: 'NIN' | 'Passport' | '';
   verificationNumber?: string;
   isVerified?: boolean;
-  userType: 'seller' | 'buyer'; // Added userType
+  userType: 'seller' | 'buyer';
 }
 
 export interface CommodityCategory {
@@ -25,7 +25,7 @@ export interface CommodityCategory {
 }
 
 export interface Commodity {
-  id: string;
+  id: string; // This will be the Firestore document ID
   name:string;
   description: string;
   category: CommodityCategory;
@@ -33,22 +33,23 @@ export interface Commodity {
   unit: string; // e.g., 'kg', 'tonne', 'liter', 'piece'
   imageUrl?: string;
   dataAiHint?: string;
-  sellerId: string;
-  sellerName: string;
+  sellerId: string; // This will be the user's uid
+  sellerName: string; // Denormalized for easier display
   sellerContact?: string;
   location?: string;
-  datePosted: string;
+  datePosted: string; // Consider using Firestore Timestamp server-side
   externalLink?: string;
-  isFeatured?: boolean; // Added for featured listings
+  isFeatured?: boolean;
 }
 
 export interface Review {
   id: string;
   sellerId: string;
+  reviewerUid: string; // UID of the user who wrote the review
   reviewerName: string;
   rating: number; // 1-5
   comment: string;
-  date: string;
+  date: string; // Consider using Firestore Timestamp
 }
 
 export interface MarketTrendDataPoint {
@@ -63,9 +64,13 @@ export interface MarketTrend {
 
 export interface Transaction {
   id: string;
-  date: string;
+  date: string; // Consider Firestore Timestamp
+  commodityId: string;
   commodityName: string;
+  sellerId: string;
   sellerName: string;
+  buyerId: string;
+  buyerName: string;
   quantity: number;
   unit: string;
   totalPrice: number;

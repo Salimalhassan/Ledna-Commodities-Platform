@@ -14,11 +14,11 @@ import {
   ShoppingCart,
   Search,
   Users,
-  Languages, // Added Languages icon
+  Languages,
   Settings, 
 } from 'lucide-react';
-import { getCurrentUser } from '@/data/placeholder';
-import type { User } from '@/lib/types';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { Skeleton } from '@/components/ui/skeleton';
 
 const sellerNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
@@ -36,7 +36,6 @@ const buyerNavItems = [
   { href: '/dashboard/profile', label: 'Profile & Verification', icon: UserCircle },
 ];
 
-// Common navigation items for both user types
 const commonNavItems = [
   { href: '/dashboard/communication-helper', label: 'Communication Helper', icon: Languages },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
@@ -44,9 +43,23 @@ const commonNavItems = [
 
 export default function AppSidebarNav() {
   const pathname = usePathname();
-  const currentUser = getCurrentUser(); 
+  const { currentUser, loading } = useAuth(); 
 
-  const userSpecificNavItems = currentUser.userType === 'seller' ? sellerNavItems : buyerNavItems;
+  if (loading) {
+    return (
+      <nav className="grid gap-2 p-4 text-sm font-medium">
+        {[...Array(5)].map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-md" />
+        ))}
+      </nav>
+    );
+  }
+
+  // Default to buyer navigation if user or userType is not available (e.g., during initial load or error)
+  // Or you could show no specific items or a "Please complete profile" message.
+  const userType = currentUser?.userType || 'buyer'; 
+  
+  const userSpecificNavItems = userType === 'seller' ? sellerNavItems : buyerNavItems;
   const navItems = [...userSpecificNavItems, ...commonNavItems];
 
   return (

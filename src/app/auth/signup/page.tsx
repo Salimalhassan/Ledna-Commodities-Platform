@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
 import appLogo from '@/assets/logo.png';
+import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,10 +17,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignupSchema } from '@/lib/schemas';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { createUserProfileDocument } from '@/context/AuthContext';
+import type { User } from '@/lib/types';
+
 
 export default function SignupPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof SignupSchema>>({
     resolver: zodResolver(SignupSchema),
@@ -28,19 +35,53 @@ export default function SignupPage() {
       email: '',
       password: '',
       confirmPassword: '',
-      userType: 'buyer', // Default to buyer, or could be undefined
+      userType: 'buyer',
     },
   });
 
-  function onSubmit(values: z.infer<typeof SignupSchema>) {
-    // Placeholder for actual signup logic
-    console.log('Signup submitted:', values);
-     toast({
-      title: "Signup Attempted",
-      description: `Account creation for ${values.userType} is a placeholder.`,
-    });
-    // Simulate successful signup redirect
-    router.push('/dashboard');
+  async function onSubmit(values: z.infer<typeof SignupSchema>) {
+    setIsLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const firebaseUser = userCredential.user;
+
+      if (firebaseUser) {
+        // Create user profile in Firestore
+        const userProfileData: Omit<User, 'uid'> = {
+          name: values.name,
+          email: values.email,
+          userType: values.userType,
+          // Initialize other fields as needed, e.g., empty strings or default values
+          avatarUrl: '',
+          location: '',
+          address: '',
+          city: '',
+          country: '',
+          phone: '',
+          isVerified: false,
+        };
+        await createUserProfileDocument(firebaseUser.uid, userProfileData);
+
+        toast({
+          title: "Account Created",
+          description: "Your account has been successfully created.",
+        });
+        router.push('/dashboard');
+      }
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      let errorMessage = "Failed to create account. Please try again.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email address is already in use.";
+      }
+      toast({
+        variant: "destructive",
+        title: "Signup Failed",
+        description: errorMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -64,7 +105,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Full Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="John Doe" {...field} />
+                      <Input placeholder="John Doe" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -77,7 +118,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="you@example.com" {...field} />
+                      <Input type="email" placeholder="you@example.com" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -90,7 +131,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -103,7 +144,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Confirm Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -120,6 +161,7 @@ export default function SignupPage() {
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         className="flex flex-col space-y-1"
+                        disabled={isLoading}
                       >
                         <FormItem className="flex items-center space-x-3 space-y-0">
                           <FormControl>
@@ -143,8 +185,8 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                Create Account
+              <Button type="submit" className="w-full" disabled={isLoading}>
+                {isLoading ? 'Creating Account...' : 'Create Account'}
               </Button>
             </form>
           </Form>

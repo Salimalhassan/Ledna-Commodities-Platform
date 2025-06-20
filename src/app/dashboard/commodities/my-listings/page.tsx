@@ -1,18 +1,61 @@
 
+'use client'; // Required for client-side hooks
+
 import CommodityCard from '@/components/CommodityCard';
 import { Button } from '@/components/ui/button';
-import { sampleCommodities, getCurrentUser } from '@/data/placeholder';
-import { PlusCircle } from 'lucide-react';
+import { sampleCommodities } from '@/data/placeholder'; // Still using placeholder for now
+import { PlusCircle, PackageSearch, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function MyListingsPage() {
-  const currentUser = getCurrentUser();
-  const userCommodities = sampleCommodities.filter(c => c.sellerId === currentUser.id);
+  const { currentUser, loading } = useAuth();
+  const router = useRouter();
+
+  // TODO: In a real app, fetch commodities from Firestore filtered by currentUser.uid
+  // For now, filter placeholder data if currentUser matches a placeholder seller
+  // This is a temporary measure until commodities are stored in Firestore.
+  const userCommodities = currentUser
+    ? sampleCommodities.filter(c => c.sellerId === currentUser.uid || 
+        (currentUser.uid === 'placeholder-seller-bob' && c.sellerId === 'placeholder-seller-bob') ||
+        (currentUser.uid === 'placeholder-seller-carol' && c.sellerId === 'placeholder-seller-carol')
+      )
+    : [];
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
+        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
+        <p>Loading your listings...</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    // Should be caught by ProtectedRoute, but good to have a fallback.
+    router.push('/auth/login');
+    return null;
+  }
+  
+  if (currentUser.userType !== 'seller') {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
+        <PackageSearch className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground mb-4">Only sellers can view "My Listings".</p>
+        <Button asChild>
+          <Link href="/dashboard">Go to Dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 md:gap-0">
-        <h1 className="text-3xl font-bold font-headline">My Commodity Listings</h1>
+        <h1 className="text-3xl font-bold font-headline">My Commodity Listings (Placeholder Data)</h1>
         <Button asChild>
           <Link href="/dashboard/commodities/upload">
             <PlusCircle className="mr-2 h-5 w-5" /> Add New Listing
@@ -28,7 +71,7 @@ export default function MyListingsPage() {
         </div>
       ) : (
         <div className="text-center py-12">
-          <PackageIcon className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+          <PackageSearch className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No Listings Yet</h2>
           <p className="text-muted-foreground mb-4">You haven&apos;t listed any commodities. Start selling now!</p>
           <Button asChild>
@@ -40,7 +83,7 @@ export default function MyListingsPage() {
   );
 }
 
-function PackageIcon(props: React.SVGProps<SVGSVGElement>) {
+function PackageIcon(props: React.SVGProps<SVGSVGElement>) { // Keep for now if used elsewhere, or remove if not.
   return (
     <svg
       {...props}

@@ -3,45 +3,57 @@
 
 import type * as z from 'zod';
 import type { CommodityUploadSchema } from '@/lib/schemas';
-import { getCurrentUser } from '@/data/placeholder'; // To simulate associating with a user
+// Firebase related imports will be needed when saving to Firestore
+// import { db } from '@/lib/firebase';
+// import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface CommodityActionResult {
   success: boolean;
   message: string;
   error?: string;
-  commodityId?: string; // Could be useful if we were actually saving
+  commodityId?: string;
 }
 
 export async function handleCommodityUpload(
+  sellerUid: string, // Seller's Firebase UID
   values: z.infer<typeof CommodityUploadSchema>
 ): Promise<CommodityActionResult> {
-  const currentUser = getCurrentUser(); // In a real app, this would come from session/auth
+  if (!sellerUid) {
+    return {
+      success: false,
+      message: "User not authenticated.",
+      error: "Authentication is required to upload a commodity."
+    };
+  }
 
-  console.log(`Server Action: User ${currentUser.id} attempting to upload commodity:`);
+  console.log(`Server Action: User ${sellerUid} attempting to upload commodity:`);
   console.log(values);
 
   // Simulate backend processing
   await new Promise(resolve => setTimeout(resolve, 1500));
 
-  // In a real backend, you would:
+  // Placeholder: In a real backend, you would:
   // 1. Validate data again (though client-side Zod helps)
-  // 2. Save to database (e.g., Firestore)
-  // 3. Handle potential errors during save
-
-  // Placeholder success
-  const newCommodityId = `com-${Date.now()}`; // Placeholder ID
-  console.log(`Server Action: Commodity "${values.name}" (placeholder ID: ${newCommodityId}) processed for user ${currentUser.id}.`);
-
-  return {
-    success: true,
-    message: `Commodity "${values.name}" has been processed by the backend.`,
-    commodityId: newCommodityId,
+  // 2. Prepare commodity data, including sellerUid as sellerId
+  /*
+  const commodityData = {
+    ...values,
+    sellerId: sellerUid,
+    sellerName: "Fetched from user profile", // You'd fetch this or pass it
+    datePosted: serverTimestamp(), // Use Firestore server timestamp
+    // category: findCategoryObjectById(values.categoryId) // Map categoryId to full object
   };
-
-  // Example error handling (currently commented out)
+  */
+  // 3. Save to Firestore `commodities` collection
   /*
   try {
-    // ... database operations ...
+    const docRef = await addDoc(collection(db, 'commodities'), commodityData);
+    console.log(`Server Action: Commodity "${values.name}" (ID: ${docRef.id}) listed for user ${sellerUid}.`);
+    return {
+      success: true,
+      message: `Commodity "${values.name}" has been listed successfully.`,
+      commodityId: docRef.id,
+    };
   } catch (e) {
     console.error("Error in handleCommodityUpload:", e);
     return {
@@ -51,4 +63,14 @@ export async function handleCommodityUpload(
     };
   }
   */
+
+  // Current placeholder success as Firestore isn't fully implemented for commodities yet
+  const newCommodityId = `com-placeholder-${Date.now()}`;
+  console.log(`Server Action: Commodity "${values.name}" (placeholder ID: ${newCommodityId}) processed for user ${sellerUid}. Backend storage pending.`);
+
+  return {
+    success: true,
+    message: `Commodity "${values.name}" has been processed by the backend (data logged, not stored yet).`,
+    commodityId: newCommodityId,
+  };
 }

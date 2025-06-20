@@ -13,11 +13,12 @@ export const commodityCategories: CommodityCategory[] = [
   { id: 'other', name: 'Other', icon: Package },
 ];
 
+// Sample users now use 'uid'
 export const sampleUsers: User[] = [
   {
-    id: 'user1',
-    name: 'Alice Wonderland',
-    email: 'alice@example.com',
+    uid: 'placeholder-buyer-alice', // Changed from id to uid
+    name: 'Alice Wonderland (Buyer)',
+    email: 'alice-buyer@example.com',
     avatarUrl: 'https://placehold.co/100x100.png',
     dataAiHint: 'woman smiling',
     location: 'Nairobi, Kenya',
@@ -27,12 +28,12 @@ export const sampleUsers: User[] = [
     country: 'Kenya',
     isVerified: true,
     verificationType: 'Passport',
-    userType: 'buyer', // Alice is now a buyer
+    userType: 'buyer',
   },
   {
-    id: 'user2',
-    name: 'Bob The Farmer',
-    email: 'bob@example.com',
+    uid: 'placeholder-seller-bob', // Changed from id to uid
+    name: 'Bob The Farmer (Seller)',
+    email: 'bob-seller@example.com',
     avatarUrl: 'https://placehold.co/100x100.png',
     dataAiHint: 'man farmer',
     location: 'Eldoret, Kenya',
@@ -41,12 +42,12 @@ export const sampleUsers: User[] = [
     city: 'Eldoret',
     country: 'Kenya',
     isVerified: false,
-    userType: 'seller', // Bob is a seller
+    userType: 'seller',
   },
   {
-    id: 'user3',
-    name: 'Carol Trader',
-    email: 'carol@example.com',
+    uid: 'placeholder-seller-carol', // Changed from id to uid
+    name: 'Carol Trader (Seller)',
+    email: 'carol-seller@example.com',
     avatarUrl: 'https://placehold.co/100x100.png',
     dataAiHint: 'woman business',
     location: 'Mombasa, Kenya',
@@ -56,7 +57,7 @@ export const sampleUsers: User[] = [
     country: 'Kenya',
     isVerified: true,
     verificationType: 'NIN',
-    userType: 'seller', // Carol is also a seller
+    userType: 'seller',
   }
 ];
 
@@ -70,12 +71,12 @@ export const sampleCommodities: Commodity[] = [
     unit: 'kg',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'maize field',
-    sellerId: 'user2', // Bob sells this
-    sellerName: 'Bob The Farmer',
+    sellerId: 'placeholder-seller-bob', // Bob sells this
+    sellerName: 'Bob The Farmer (Seller)',
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
     datePosted: '2024-07-15',
-    isFeatured: true, 
+    isFeatured: true,
   },
   {
     id: 'com2',
@@ -86,8 +87,8 @@ export const sampleCommodities: Commodity[] = [
     unit: 'piece',
     imageUrl: 'https://placehold.co/600x400.png',
     dataAiHint: 'apples basket',
-    sellerId: 'user2', // Bob sells this
-    sellerName: 'Bob The Farmer',
+    sellerId: 'placeholder-seller-bob', // Bob sells this
+    sellerName: 'Bob The Farmer (Seller)',
     sellerContact: '+254 711 987654',
     location: 'Eldoret, Kenya',
     datePosted: '2024-07-20',
@@ -101,9 +102,9 @@ export const sampleCommodities: Commodity[] = [
     price: 15,
     unit: 'dozen',
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'eggs carton', // Added dataAiHint
-    sellerId: 'user3', // Carol sells this
-    sellerName: 'Carol Trader',
+    dataAiHint: 'eggs carton',
+    sellerId: 'placeholder-seller-carol', // Carol sells this
+    sellerName: 'Carol Trader (Seller)',
     location: 'Mombasa, Kenya',
     datePosted: '2024-07-22',
   },
@@ -115,9 +116,9 @@ export const sampleCommodities: Commodity[] = [
     price: 3,
     unit: 'kg',
     imageUrl: 'https://placehold.co/600x400.png',
-    dataAiHint: 'green beans', // Added dataAiHint
-    sellerId: 'user3', // Carol sells this
-    sellerName: 'Carol Trader',
+    dataAiHint: 'green beans',
+    sellerId: 'placeholder-seller-carol', // Carol sells this
+    sellerName: 'Carol Trader (Seller)',
     location: 'Mombasa, Kenya',
     datePosted: '2024-07-23',
   }
@@ -153,23 +154,26 @@ export const sampleMarketTrends: MarketTrend[] = [
 export const sampleReviews: Review[] = [
   {
     id: 'rev1',
-    sellerId: 'user2', // Review for Bob
-    reviewerName: 'Alice Wonderland',
+    sellerId: 'placeholder-seller-bob', // Review for Bob
+    reviewerUid: 'placeholder-buyer-alice',
+    reviewerName: 'Alice Wonderland (Buyer)',
     rating: 5,
     comment: 'Excellent quality maize and fast delivery. Highly recommend Bob!',
     date: '2024-07-18',
   },
   {
     id: 'rev2',
-    sellerId: 'user3', // Review for Carol
-    reviewerName: 'Alice Wonderland',
+    sellerId: 'placeholder-seller-carol', // Review for Carol
+    reviewerUid: 'placeholder-buyer-alice',
+    reviewerName: 'Alice Wonderland (Buyer)',
     rating: 4,
     comment: 'Good eggs, fresh as advertised. Packaging could be slightly better.',
     date: '2024-07-23',
   },
   {
     id: 'rev3',
-    sellerId: 'user2', // Review for Bob
+    sellerId: 'placeholder-seller-bob', // Review for Bob
+    reviewerUid: 'anonymous-buyer-uid',
     reviewerName: 'Anonymous Buyer',
     rating: 5,
     comment: 'The apples were delicious and very fresh. Bob is a great seller.',
@@ -181,8 +185,12 @@ export const sampleTransactions: Transaction[] = [
   {
     id: 'txn1',
     date: '2024-07-18',
+    commodityId: 'com1',
     commodityName: 'Organic Maize',
-    sellerName: 'Bob The Farmer',
+    sellerId: 'placeholder-seller-bob',
+    sellerName: 'Bob The Farmer (Seller)',
+    buyerId: 'placeholder-buyer-alice',
+    buyerName: 'Alice Wonderland (Buyer)',
     quantity: 20,
     unit: 'kg',
     totalPrice: 1000,
@@ -191,8 +199,12 @@ export const sampleTransactions: Transaction[] = [
   {
     id: 'txn2',
     date: '2024-07-23',
+    commodityId: 'com3',
     commodityName: 'Farm Fresh Eggs',
-    sellerName: 'Carol Trader',
+    sellerId: 'placeholder-seller-carol',
+    sellerName: 'Carol Trader (Seller)',
+    buyerId: 'placeholder-buyer-alice',
+    buyerName: 'Alice Wonderland (Buyer)',
     quantity: 5,
     unit: 'dozen',
     totalPrice: 75,
@@ -201,8 +213,12 @@ export const sampleTransactions: Transaction[] = [
   {
     id: 'txn3',
     date: '2024-07-25',
+    commodityId: 'com4',
     commodityName: 'Green Beans',
-    sellerName: 'Carol Trader',
+    sellerId: 'placeholder-seller-carol',
+    sellerName: 'Carol Trader (Seller)',
+    buyerId: 'placeholder-buyer-alice',
+    buyerName: 'Alice Wonderland (Buyer)',
     quantity: 10,
     unit: 'kg',
     totalPrice: 30,
@@ -210,4 +226,6 @@ export const sampleTransactions: Transaction[] = [
   },
 ];
 
-export const getCurrentUser = (): User => sampleUsers[0]; // Alice (buyer) as default logged-in user
+// The getCurrentUser function is deprecated. AuthContext will provide the current user.
+// Components should use `useAuth()` hook from `AuthContext` instead.
+// export const getCurrentUser = (): User => sampleUsers[0];

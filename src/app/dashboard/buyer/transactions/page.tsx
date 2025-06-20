@@ -1,20 +1,56 @@
 
+'use client'; // Required for client-side hooks
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { sampleTransactions, getCurrentUser } from "@/data/placeholder";
-import { ShoppingCart } from "lucide-react";
+import { sampleTransactions } from "@/data/placeholder"; // Still using placeholder
+import { ShoppingCart, Loader2 } from "lucide-react";
 import { format } from 'date-fns';
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function BuyerTransactionsPage() {
-  const currentUser = getCurrentUser();
-  // In a real app, transactions would be filtered by buyerId
-  const transactions = sampleTransactions; 
+  const { currentUser, loading } = useAuth();
+  const router = useRouter();
+
+  // TODO: In a real app, transactions would be fetched from Firestore filtered by buyerId (currentUser.uid)
+  const transactions = sampleTransactions; // Using placeholder for now
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
+        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary mb-4" />
+        <p>Loading your transactions...</p>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    router.push('/auth/login'); // Should be handled by ProtectedRoute
+    return null;
+  }
+
+  if (currentUser.userType !== 'buyer') {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
+        <ShoppingCart className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground mb-4">Only buyers can view transaction history.</p>
+        <Button asChild>
+          <Link href="/dashboard">Go to Dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
+
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
       <h1 className="text-3xl font-bold mb-8 font-headline flex items-center">
-        <ShoppingCart className="mr-3 h-8 w-8 text-primary" /> My Transaction History
+        <ShoppingCart className="mr-3 h-8 w-8 text-primary" /> My Transaction History (Placeholder Data)
       </h1>
       <Card className="shadow-xl">
         <CardHeader>

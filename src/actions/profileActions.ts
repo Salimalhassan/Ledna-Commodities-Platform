@@ -3,7 +3,8 @@
 
 import type * as z from 'zod';
 import type { UserProfileSchema } from '@/lib/schemas';
-import { getCurrentUser } from '@/data/placeholder'; // To simulate operating on a specific user
+import { db } from '@/lib/firebase'; // Import Firestore instance
+import { doc, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 export interface ProfileActionResult {
   success: boolean;
@@ -12,32 +13,50 @@ export interface ProfileActionResult {
 }
 
 export async function handleUpdateProfile(
+  uid: string, // User's Firebase UID
   values: z.infer<typeof UserProfileSchema>
 ): Promise<ProfileActionResult> {
-  const currentUser = getCurrentUser(); // In a real app, this would come from session/auth
+  if (!uid) {
+    return {
+      success: false,
+      message: "User not authenticated.",
+      error: "Authentication is required to update profile."
+    };
+  }
 
-  console.log(`Server Action: User ${currentUser.id} attempting to update profile with:`);
+  console.log(`Server Action: User ${uid} attempting to update profile with:`);
   console.log(values);
 
-  // Simulate backend processing
-  await new Promise(resolve => setTimeout(resolve, 1000));
-
-  // In a real backend, you would:
-  // 1. Validate data again
-  // 2. Update user record in database
-  // 3. Handle potential errors during update
-
-  console.log(`Server Action: Profile for user ${currentUser.id} processed.`);
-
-  return {
-    success: true,
-    message: "Profile information has been processed by the backend.",
-  };
-
-  // Example error handling (currently commented out)
-  /*
   try {
-    // ... database operations ...
+    const userDocRef = doc(db, 'users', uid);
+    
+    // Prepare data for Firestore, filtering out undefined values if necessary
+    // and ensuring email (if present and changed) is handled with care
+    // For this example, we assume email is not changed here or managed via Firebase Auth directly.
+    const profileDataToUpdate: Partial<z.infer<typeof UserProfileSchema>> = {};
+    
+    (Object.keys(values) as Array<keyof typeof values>).forEach(key => {
+      if (values[key] !== undefined && key !== 'email') { // Exclude email from direct update here
+        // @ts-ignore
+        profileDataToUpdate[key] = values[key];
+      }
+    });
+
+    // Add a timestamp for when the profile was last updated
+    // @ts-ignore
+    profileDataToUpdate.updatedAt = serverTimestamp();
+
+
+    await updateDoc(userDocRef, {
+      ...profileDataToUpdate
+    });
+
+    console.log(`Server Action: Profile for user ${uid} updated successfully.`);
+    return {
+      success: true,
+      message: "Profile information has been updated successfully.",
+    };
+
   } catch (e) {
     console.error("Error in handleUpdateProfile:", e);
     return {
@@ -46,5 +65,4 @@ export async function handleUpdateProfile(
       error: e instanceof Error ? e.message : "An unknown error occurred."
     };
   }
-  */
 }

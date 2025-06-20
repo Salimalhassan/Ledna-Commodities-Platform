@@ -1,24 +1,34 @@
 
+'use client';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
-import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart, Search, Users } from "lucide-react";
+import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart, Search, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { sampleCommodities, getCurrentUser, sampleUsers } from "@/data/placeholder";
+import { sampleCommodities, sampleUsers } from "@/data/placeholder"; // MyListings/BuyerDashboard will still use some placeholders
 import type { User } from "@/lib/types";
 import SellerPreviewCard from "@/components/SellerPreviewCard";
 import { Input } from "@/components/ui/input";
-import appLogo from '@/assets/logo.png';
-
+import { useAuth } from "@/context/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // Seller Dashboard Content
 function SellerDashboard({ user }: { user: User }) {
-  const userCommodities = sampleCommodities.filter(c => c.sellerId === user.id);
+  // TODO: Replace sampleCommodities with actual data fetched for this user
+  const userCommodities = sampleCommodities.filter(c => c.sellerId === user.uid || c.sellerId === 'placeholder-seller-bob' || c.sellerId === 'placeholder-seller-carol'); // Temporary fallback
+
+  const profileCompletion = [
+    user.name, user.email, user.phone, user.location, user.address, user.city, user.country, user.avatarUrl
+  ].filter(Boolean).length;
+  const totalProfileFields = 8;
+  const completionPercentage = Math.round((profileCompletion / totalProfileFields) * 100);
+
 
   const quickStats = [
     { title: "Active Listings", value: userCommodities.length, icon: <List className="h-6 w-6 text-primary" />, color: "text-primary" },
-    { title: "Profile Completion", value: 75, icon: <UserCircle className="h-6 w-6 text-green-500" />, unit: "%", color: "text-green-500" },
+    { title: "Profile Completion", value: completionPercentage, icon: <UserCircle className="h-6 w-6 text-green-500" />, unit: "%", color: "text-green-500" },
     { title: "Total Sales (Mock)", value: 1250, icon: <DollarSign className="h-6 w-6 text-blue-500" />, unit: "USD", color: "text-blue-500" },
     { title: "Average Rating (Mock)", value: 4.5, icon: <Star className="h-6 w-6 text-yellow-500" />, unit: "/5", color: "text-yellow-500" },
   ];
@@ -45,7 +55,7 @@ function SellerDashboard({ user }: { user: User }) {
         <div className="lg:col-span-2">
           <Card className="shadow-md">
             <CardHeader>
-              <CardTitle className="font-headline">Recent Listings</CardTitle>
+              <CardTitle className="font-headline">Recent Listings (Placeholder)</CardTitle>
               <CardDescription>Your most recently added commodities.</CardDescription>
             </CardHeader>
             <CardContent>
@@ -106,6 +116,7 @@ function SellerDashboard({ user }: { user: User }) {
 
 // Buyer Dashboard Content
 function BuyerDashboard({ user }: { user: User }) {
+  // TODO: Fetch actual sellers from Firestore
   const potentialSellers = sampleUsers.filter(u => u.userType === 'seller');
 
   return (
@@ -130,12 +141,12 @@ function BuyerDashboard({ user }: { user: User }) {
 
       <section>
         <h2 className="text-2xl font-bold mb-6 font-headline flex items-center">
-          <Users className="mr-3 h-7 w-7 text-primary" /> Potential Sellers
+          <Users className="mr-3 h-7 w-7 text-primary" /> Potential Sellers (Placeholder)
         </h2>
         {potentialSellers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {potentialSellers.map(seller => (
-              <SellerPreviewCard key={seller.id} seller={seller} />
+              <SellerPreviewCard key={seller.uid} seller={seller} />
             ))}
           </div>
         ) : (
@@ -148,11 +159,32 @@ function BuyerDashboard({ user }: { user: User }) {
 
 
 export default function DashboardPage() {
-  const user = getCurrentUser();
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    // This should ideally be handled by ProtectedRoute, but as a fallback:
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6">
+        <p>Please log in to view the dashboard.</p>
+        <Button asChild className="mt-4"><Link href="/auth/login">Login</Link></Button>
+      </div>
+    );
+  }
+  
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
-      {user.userType === 'seller' ? <SellerDashboard user={user} /> : <BuyerDashboard user={user} />}
+      {currentUser.userType === 'seller' ? <SellerDashboard user={currentUser} /> : <BuyerDashboard user={currentUser} />}
     </div>
   );
 }

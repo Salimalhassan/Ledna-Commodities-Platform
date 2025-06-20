@@ -1,11 +1,10 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
-import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -13,42 +12,71 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { UserProfileSchema } from '@/lib/schemas';
-import { getCurrentUser } from '@/data/placeholder';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UploadCloud, ShieldCheck } from 'lucide-react';
 import { handleUpdateProfile } from '@/actions/profileActions';
+import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { User } from '@/lib/types';
 
 export default function ProfilePage() {
-  const currentUser = getCurrentUser();
+  const { currentUser, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFetchingProfile, setIsFetchingProfile] = useState(true);
 
   const form = useForm<z.infer<typeof UserProfileSchema>>({
     resolver: zodResolver(UserProfileSchema),
     defaultValues: {
-      name: currentUser.name || '',
-      email: currentUser.email || '', // Typically email is not editable or managed separately
-      phone: currentUser.phone || '',
-      address: currentUser.address || '',
-      city: currentUser.city || '',
-      country: currentUser.country || '',
-      avatarUrl: currentUser.avatarUrl || '',
-      verificationType: currentUser.verificationType || '',
-      verificationNumber: currentUser.verificationNumber || '',
+      name: '',
+      email: '',
+      phone: '',
+      address: '',
+      city: '',
+      country: '',
+      avatarUrl: '',
+      verificationType: '',
+      verificationNumber: '',
     },
   });
 
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      // currentUser from AuthContext already contains Firestore data
+      form.reset({
+        name: currentUser.name || '',
+        email: currentUser.email || '', // Email typically comes from Auth, might be read-only
+        phone: currentUser.phone || '',
+        address: currentUser.address || '',
+        city: currentUser.city || '',
+        country: currentUser.country || '',
+        avatarUrl: currentUser.avatarUrl || '',
+        verificationType: currentUser.verificationType || '',
+        verificationNumber: currentUser.verificationNumber || '',
+      });
+      setIsFetchingProfile(false);
+    } else if (!authLoading && !currentUser) {
+        // Handle case where user is not logged in but somehow reached here (ProtectedRoute should prevent this)
+        setIsFetchingProfile(false);
+    }
+  }, [currentUser, authLoading, form]);
+
+
   async function onSubmit(values: z.infer<typeof UserProfileSchema>) {
+    if (!currentUser?.uid) {
+      toast({ variant: 'destructive', title: 'Error', description: 'User not authenticated.' });
+      return;
+    }
     setIsSubmitting(true);
     try {
-      const result = await handleUpdateProfile(values);
+      const result = await handleUpdateProfile(currentUser.uid, values);
       if (result.success) {
         toast({
-          title: 'Profile Update Submitted',
+          title: 'Profile Updated',
           description: result.message,
         });
-        // Potentially refresh user data or re-fetch if necessary in a real app
+        // Optionally, you might want to re-fetch user data into AuthContext or rely on its existing mechanism
       } else {
         toast({
           variant: 'destructive',
@@ -67,8 +95,38 @@ export default function ProfilePage() {
       setIsSubmitting(false);
     }
   }
+  
+  if (authLoading || isFetchingProfile) {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6 space-y-8">
+        <Skeleton className="h-10 w-1/3 mb-8" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <Card className="lg:col-span-1 shadow-md">
+            <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+            <CardContent className="flex flex-col items-center space-y-4">
+              <Skeleton className="h-32 w-32 rounded-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-8 w-full" />
+            </CardContent>
+          </Card>
+          <Card className="lg:col-span-2 shadow-md">
+            <CardHeader><Skeleton className="h-6 w-1/3" /><Skeleton className="h-4 w-1/2 mt-2" /></CardHeader>
+            <CardContent className="space-y-6">
+              <Skeleton className="h-10 w-full" /> <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-20 w-full" /> <Skeleton className="h-10 w-full" />
+            </CardContent>
+          </Card>
+        </div>
+         <Skeleton className="h-10 w-24 self-end" />
+      </div>
+    );
+  }
 
-  const userInitials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  if (!currentUser) {
+     return <div className="container mx-auto py-8 px-4 md:px-6">Please log in to view your profile.</div>;
+  }
+
+  const userInitials = currentUser.name?.split(' ').map(n => n[0]).join('').toUpperCase() || '??';
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -76,7 +134,6 @@ export default function ProfilePage() {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Profile Picture Card */}
             <Card className="lg:col-span-1 shadow-md">
               <CardHeader>
                 <CardTitle className="font-headline">Profile Picture</CardTitle>
@@ -100,13 +157,12 @@ export default function ProfilePage() {
                     </FormItem>
                   )}
                 />
-                <Button type="button" variant="outline" className="w-full" disabled> {/* Placeholder for actual upload */}
+                <Button type="button" variant="outline" className="w-full" disabled>
                   <UploadCloud className="mr-2 h-4 w-4" /> Upload Image (Disabled)
                 </Button>
               </CardContent>
             </Card>
 
-            {/* Personal Information Card */}
             <Card className="lg:col-span-2 shadow-md">
               <CardHeader>
                 <CardTitle className="font-headline">Personal Information</CardTitle>
@@ -131,8 +187,8 @@ export default function ProfilePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email (Read-only)</FormLabel>
-                        <FormControl><Input {...field} readOnly disabled={isSubmitting} /></FormControl>
-                        <FormDescription>Email cannot be changed here.</FormDescription>
+                        <FormControl><Input {...field} readOnly disabled={isSubmitting || true} /></FormControl>
+                        <FormDescription>Email is managed via your authentication provider.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -188,13 +244,12 @@ export default function ProfilePage() {
             </Card>
           </div>
 
-          {/* Verification Card */}
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="font-headline flex items-center">
                 <ShieldCheck className="mr-2 h-6 w-6 text-primary" /> Identity Verification
               </CardTitle>
-              <CardDescription>Verify your identity to build trust on the platform. (Feature is UI only)</CardDescription>
+              <CardDescription>Verify your identity to build trust on the platform. (Feature is UI only for document upload)</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -250,7 +305,7 @@ export default function ProfilePage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting || authLoading || isFetchingProfile}>
               {isSubmitting ? 'Saving...' : 'Save Profile'}
             </Button>
           </div>

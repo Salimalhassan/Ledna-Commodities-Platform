@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
@@ -12,43 +12,65 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { CommodityUploadSchema } from '@/lib/schemas';
-import { commodityCategories, getCurrentUser } from '@/data/placeholder';
+import { commodityCategories } from '@/data/placeholder'; // Still use placeholder categories for now
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { handleCommodityUpload } from '@/actions/commodityActions';
+import { useAuth } from '@/context/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function CommodityUploadPage() {
-  const currentUser = getCurrentUser();
+  const { currentUser, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof CommodityUploadSchema>>({
     resolver: zodResolver(CommodityUploadSchema),
-    defaultValues: {
+    defaultValues: { // Default values will be updated by useEffect if currentUser exists
       name: '',
       description: '',
       categoryId: '',
       price: 0,
       unit: '',
       imageUrl: '',
-      sellerContact: currentUser.phone || '',
-      location: currentUser.location || '',
+      sellerContact: '',
+      location: '',
       externalLink: '',
     },
   });
 
+  useEffect(() => {
+    if (currentUser && !authLoading) {
+      form.reset({
+        ...form.getValues(), // Keep existing form values if any
+        sellerContact: currentUser.phone || '',
+        location: currentUser.city && currentUser.country ? `${currentUser.city}, ${currentUser.country}` : currentUser.location || '',
+      });
+    }
+  }, [currentUser, authLoading, form]);
+
+
   async function onSubmit(values: z.infer<typeof CommodityUploadSchema>) {
+    if (!currentUser?.uid) {
+      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to list a commodity.' });
+      return;
+    }
+    if (currentUser.userType !== 'seller') {
+      toast({ variant: 'destructive', title: 'Action Not Allowed', description: 'Only sellers can list commodities.' });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      const result = await handleCommodityUpload(values);
+      // Pass currentUser.uid as sellerUid
+      const result = await handleCommodityUpload(currentUser.uid, values);
       if (result.success) {
         toast({
           title: 'Commodity Submitted',
           description: result.message,
         });
-        // In a real app, you would save the data and then redirect or clear form
         router.push('/dashboard/commodities/my-listings');
       } else {
         toast({
@@ -68,6 +90,39 @@ export default function CommodityUploadPage() {
       setIsSubmitting(false);
     }
   }
+  
+  if (authLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 md:px-6">
+        <Card className="max-w-3xl mx-auto shadow-xl">
+          <CardHeader>
+            <Skeleton className="h-8 w-3/4" />
+            <Skeleton className="h-4 w-1/2 mt-2" />
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+            <div className="flex justify-end pt-4">
+              <Skeleton className="h-10 w-24" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!currentUser || currentUser.userType !== 'seller') {
+     return (
+      <div className="container mx-auto py-8 px-4 md:px-6 text-center">
+        <UploadCloud className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Access Denied</h2>
+        <p className="text-muted-foreground">
+          { !currentUser ? "Please log in to list a commodity." : "Only users registered as sellers can list commodities."}
+        </p>
+        {!currentUser && <Button onClick={() => router.push('/auth/login')} className="mt-4">Login</Button>}
+      </div>
+    );
+  }
+
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -154,7 +209,7 @@ export default function CommodityUploadPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Price</FormLabel>
-                      <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} disabled={isSubmitting} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -209,7 +264,7 @@ export default function CommodityUploadPage() {
                 )}
               />
               <div className="flex justify-end pt-4">
-                <Button type="submit" size="lg" disabled={isSubmitting}>
+                <Button type="submit" size="lg" disabled={isSubmitting || authLoading}>
                   {isSubmitting ? 'Submitting...' : 'List Commodity'}
                 </Button>
               </div>
