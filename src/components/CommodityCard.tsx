@@ -7,7 +7,7 @@ import type { Commodity } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, MapPin, Eye, Star, PlusCircle, XCircle, Loader2 } from 'lucide-react';
+import { DollarSign, MapPin, Eye, Star, PlusCircle, XCircle, Loader2, ShoppingCart } from 'lucide-react';
 import { commodityCategories } from '@/data/placeholder'; // For icons
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
@@ -29,10 +29,18 @@ import { useAuth } from '@/context/AuthContext'; // To get user email
 interface CommodityCardProps {
   commodity: Commodity;
   showFeatureManagement?: boolean;
+  showPurchaseButton?: boolean;
   onFeatureStatusChange?: (commodityId: string, newStatus: boolean) => void;
+  onPurchaseClick?: (commodity: Commodity) => void;
 }
 
-export default function CommodityCard({ commodity, showFeatureManagement = false, onFeatureStatusChange }: CommodityCardProps) {
+export default function CommodityCard({ 
+  commodity, 
+  showFeatureManagement = false, 
+  showPurchaseButton = false,
+  onFeatureStatusChange,
+  onPurchaseClick 
+}: CommodityCardProps) {
   const { toast } = useToast();
   const { currentUser } = useAuth(); // Get current user
   const categoryDetails = commodityCategories.find(cat => cat.id === commodity.categoryId);
@@ -107,6 +115,89 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
       setIsFeaturing(false);
     }
   }
+  
+  const renderFooter = () => {
+    if (showPurchaseButton) {
+      return (
+        <Button className="w-full" onClick={() => onPurchaseClick?.(commodity)}>
+          <ShoppingCart className="mr-2 h-4 w-4" />
+          Make Purchase
+        </Button>
+      );
+    }
+
+    if (showFeatureManagement) {
+      return commodity.isFeatured ? (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full border-destructive text-destructive hover:bg-destructive/10"
+              disabled={isUnfeaturing}
+            >
+              {isUnfeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <XCircle className="mr-2 h-s w-5" />}
+              Unfeature Listing
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unfeature Listing?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to remove the "Featured" status from "{commodity.name}"? 
+                This action does not issue a refund.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isUnfeaturing}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleUnfeature} disabled={isUnfeaturing} className="bg-destructive hover:bg-destructive/90">
+                {isUnfeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Yes, Unfeature
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      ) : (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button 
+              variant="outline" 
+              className="w-full border-primary text-primary hover:bg-primary/10"
+              disabled={isFeaturing}
+            >
+              {isFeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <PlusCircle className="mr-2 h-5 w-5" />}
+              Feature Listing
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Feature Your Listing?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Make "{commodity.name}" a featured listing to increase its visibility.
+                This service costs ${FEATURE_PRICE_USD}. Clicking 'Proceed to Payment' will redirect you to our secure payment processor, Paystack.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isFeaturing}>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleFeatureRequest} disabled={isFeaturing} className="bg-primary hover:bg-primary/90">
+                 {isFeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Proceed to Payment (${FEATURE_PRICE_USD})
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      );
+    }
+    
+    // Default button
+    return (
+      <Button asChild className="w-full">
+        <Link href={`/sellers/${commodity.sellerId}`}>
+          <Eye className="mr-2 h-4 w-4" /> View Seller: {commodity.sellerName}
+        </Link>
+      </Button>
+    );
+  };
+
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -147,73 +238,7 @@ export default function CommodityCard({ commodity, showFeatureManagement = false
         </div>
       </CardContent>
       <CardFooter className="p-4 border-t">
-        {showFeatureManagement ? (
-          commodity.isFeatured ? (
-             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-destructive text-destructive hover:bg-destructive/10"
-                  disabled={isUnfeaturing}
-                >
-                  {isUnfeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <XCircle className="mr-2 h-s w-5" />}
-                  Unfeature Listing
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Unfeature Listing?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Are you sure you want to remove the "Featured" status from "{commodity.name}"? 
-                    This action does not issue a refund.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isUnfeaturing}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleUnfeature} disabled={isUnfeaturing} className="bg-destructive hover:bg-destructive/90">
-                    {isUnfeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Yes, Unfeature
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          ) : (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="w-full border-primary text-primary hover:bg-primary/10"
-                  disabled={isFeaturing}
-                >
-                  {isFeaturing ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <PlusCircle className="mr-2 h-5 w-5" />}
-                  Feature Listing
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Feature Your Listing?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Make "{commodity.name}" a featured listing to increase its visibility.
-                    This service costs ${FEATURE_PRICE_USD}. Clicking 'Proceed to Payment' will redirect you to our secure payment processor, Paystack.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isFeaturing}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleFeatureRequest} disabled={isFeaturing} className="bg-primary hover:bg-primary/90">
-                     {isFeaturing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                    Proceed to Payment (${FEATURE_PRICE_USD})
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )
-        ) : (
-          <Button asChild className="w-full">
-            <Link href={`/sellers/${commodity.sellerId}`}>
-              <Eye className="mr-2 h-4 w-4" /> View Seller: {commodity.sellerName}
-            </Link>
-          </Button>
-        )}
+        {renderFooter()}
       </CardFooter>
     </Card>
   );

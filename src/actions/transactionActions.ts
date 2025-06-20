@@ -4,6 +4,7 @@
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy } from 'firebase/firestore';
 import type { Transaction } from '@/lib/types';
+import { revalidatePath } from 'next/cache';
 
 export interface TransactionActionResult {
   success: boolean;
@@ -48,6 +49,7 @@ export async function addTransaction(input: AddTransactionInput): Promise<Transa
       date: serverTimestamp(),
     };
     const docRef = await addDoc(collection(db, 'transactions'), transactionData);
+    revalidatePath('/dashboard/buyer/transactions'); // Revalidate the buyer's transactions page
     return {
       success: true,
       message: "Transaction recorded successfully.",
