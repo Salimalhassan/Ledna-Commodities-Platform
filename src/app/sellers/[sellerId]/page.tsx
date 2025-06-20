@@ -10,10 +10,9 @@ import ReviewCard from '@/components/ReviewCard';
 import RatingStars from '@/components/RatingStars';
 import PublicHeader from '@/components/layout/PublicHeader';
 import AddReviewForm from '@/components/AddReviewForm';
-import { Mail, MapPin, Phone, ShieldCheck, Star, Lock, Loader2 } from 'lucide-react';
+import { Mail, MapPin, Phone, ShieldCheck, MessageSquare, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { User, Commodity, Review } from '@/lib/types';
 import { useEffect, useState, useCallback } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
@@ -23,12 +22,57 @@ import { fetchReviewsBySellerId } from '@/actions/reviewActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/context/AuthContext';
+import { startOrGetConversation } from '@/actions/messageActions';
+
+function ContactSellerButton({ sellerId }: { sellerId: string }) {
+    const { currentUser } = useAuth();
+    const router = useRouter();
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleContact = async () => {
+        if (!currentUser) {
+            toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to contact a seller.' });
+            router.push('/auth/login');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const { conversationId } = await startOrGetConversation(currentUser.uid, sellerId);
+            router.push(`/dashboard/messages/${conversationId}`);
+        } catch (error) {
+            console.error("Failed to start conversation:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not start a conversation. Please try again.' });
+            setIsLoading(false);
+        }
+    };
+    
+    // A user cannot contact themselves
+    const isSelf = currentUser?.uid === sellerId;
+    if (isSelf) return null;
+
+    // Only buyers can contact sellers
+    if (currentUser && currentUser.userType !== 'buyer') {
+      return (
+          <Button disabled className="w-full md:w-auto">
+            <MessageSquare className="mr-2 h-4 w-4" /> Only Buyers Can Contact
+          </Button>
+      );
+    }
+
+    return (
+        <Button onClick={handleContact} disabled={isLoading} className="w-full md:w-auto">
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <MessageSquare className="mr-2 h-4 w-4" />}
+            {isLoading ? 'Starting...' : 'Contact Seller'}
+        </Button>
+    );
+}
 
 
 export default function SellerProfilePage({ params }: { params: { sellerId: string } }) {
   const { toast } = useToast();
   const { currentUser } = useAuth();
-  const router = useRouter();
   const [seller, setSeller] = useState<User | null>(null);
   const [sellerCommodities, setSellerCommodities] = useState<Commodity[]>([]);
   const [sellerReviews, setSellerReviews] = useState<Review[]>([]);
@@ -48,14 +92,12 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
     async function loadSellerData() {
       setIsLoading(true);
       try {
-        // Fetch seller profile
         const sellerDocRef = doc(db, 'users', params.sellerId);
         const sellerDocSnap = await getDoc(sellerDocRef);
 
         if (sellerDocSnap.exists()) {
           setSeller({ uid: sellerDocSnap.id, ...sellerDocSnap.data() } as User);
           
-          // Fetch commodities and reviews in parallel
           const [commodities, reviews] = await Promise.all([
             fetchCommoditiesBySellerId(params.sellerId),
             fetchReviewsBySellerId(params.sellerId)
@@ -95,12 +137,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                   <Skeleton className="h-4 w-1/4 mb-1" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>
-                <Skeleton className="h-10 w-24" />
-              </div>
-              <div className="mt-6 border-t pt-6 space-y-4">
-                <Skeleton className="h-24 w-full" />
-                 <Skeleton className="h-5 w-3/4 mb-1" />
-                 <Skeleton className="h-5 w-2/3" />
+                <Skeleton className="h-10 w-32" />
               </div>
             </CardContent>
           </Card>
@@ -156,7 +193,7 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                 <AvatarImage src={seller.avatarUrl || `https://avatar.vercel.sh/${seller.email}.png`} alt={seller.name} data-ai-hint={seller.dataAiHint || "person business"}/>
                 <AvatarFallback className="text-5xl">{sellerInitials}</AvatarFallback>
               </Avatar>
-              <div className="flex-1 text-center md:text-left pt-4">
+              <div className="flex-grow text-center md:text-left pt-4">
                 <CardTitle className="text-3xl font-bold font-headline">{seller.name}</CardTitle>
                 {seller.isVerified && (
                   <span className="inline-flex items-center text-sm text-green-600 font-medium mt-1">
@@ -166,29 +203,22 @@ export default function SellerProfilePage({ params }: { params: { sellerId: stri
                 <div className="flex items-center justify-center md:justify-start gap-2 mt-1 text-muted-foreground">
                   <MapPin className="h-4 w-4" /> {seller.location || 'Location not specified'}
                 </div>
+                 <div className="flex items-center justify-center md:justify-start gap-2 mt-1 text-muted-foreground">
+                  <RatingStars rating={averageRating} size={5} />
+                  <p className="text-sm text-muted-foreground ml-2">
+                    {averageRating > 0 ? `${averageRating.toFixed(1)} (${sellerReviews.length} reviews)` : 'No reviews yet'}
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col items-center md:items-end">
-                <RatingStars rating={averageRating} size={6} />
-                <p className="text-sm text-muted-foreground mt-1">
-                  {averageRating > 0 ? `${averageRating.toFixed(1)} (${sellerReviews.length} reviews)` : 'No reviews yet'}
-                </p>
+              <div className="flex flex-col items-center md:items-end flex-shrink-0">
+                 <ContactSellerButton sellerId={seller.uid} />
               </div>
             </div>
 
-            <div className="mt-6 border-t pt-6 space-y-4">
-              <Alert variant="default" className="bg-primary/10 border-primary/30">
-                <Lock className="h-5 w-5 text-primary" />
-                <AlertTitle className="font-headline text-primary">Connect with {seller.name}</AlertTitle>
-                <AlertDescription className="text-primary/80">
-                  To proceed with a transaction, initiate a purchase on a commodity below. This will record your interest and notify the seller. Further communication details may be shared upon transaction review.
-                </AlertDescription>
-              </Alert>
-
-              <div className="space-y-2 text-sm text-foreground/80">
-                  <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email: {seller.email || "Not available"}</span></p>
-                  {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone: {seller.phone}</span></p>}
-                  {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Address: {seller.address}, {seller.city}, {seller.country}</span></p>}
-              </div>
+            <div className="mt-6 border-t pt-6 space-y-2 text-sm text-foreground/80">
+                <p className="flex items-center"><Mail className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Email: {seller.email || "Not available"}</span></p>
+                {seller.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Phone: {seller.phone}</span></p>}
+                {seller.address && <p className="flex items-center"><MapPin className="h-4 w-4 mr-2 text-primary/50" /> <span className="italic text-muted-foreground">Address: {seller.address}, {seller.city}, {seller.country}</span></p>}
             </div>
           </CardContent>
         </Card>

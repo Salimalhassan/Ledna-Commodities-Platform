@@ -1,4 +1,3 @@
-
 import type { LucideIcon } from 'lucide-react';
 
 export interface User {
@@ -16,7 +15,7 @@ export interface User {
   verificationNumber?: string;
   isVerified?: boolean;
   userType: 'seller' | 'buyer';
-  primarySpokenLanguage?: string; // Added field
+  primarySpokenLanguage?: string;
 }
 
 export interface CommodityCategory {
@@ -77,4 +76,28 @@ export interface Transaction {
   unit: string;
   totalPrice: number;
   status: 'Completed' | 'Pending' | 'Cancelled';
+}
+
+export interface Message {
+  id: string;
+  text: string;
+  senderId: string;
+  timestamp: string; // ISO string
+}
+
+export interface Conversation {
+  id: string;
+  participantIds: string[];
+  participantInfo: {
+    [uid: string]: {
+      name: string;
+      avatarUrl?: string;
+    };
+  };
+  lastMessage: {
+    text: string;
+    timestamp: string;
+    senderId: string;
+  } | null;
+  updatedAt: string; // ISO string
 }

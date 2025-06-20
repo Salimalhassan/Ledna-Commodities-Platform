@@ -15,9 +15,10 @@ import {
   Search,
   Users,
   Languages,
-  Settings, 
+  Settings,
+  MessageSquare, // Import the new icon
 } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext'; // Import useAuth
+import { useAuth } from '@/context/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const sellerNavItems = [
@@ -37,6 +38,7 @@ const buyerNavItems = [
 ];
 
 const commonNavItems = [
+  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare }, // Add new link
   { href: '/dashboard/communication-helper', label: 'Communication Helper', icon: Languages },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
@@ -48,15 +50,13 @@ export default function AppSidebarNav() {
   if (loading) {
     return (
       <nav className="grid gap-2 p-4 text-sm font-medium">
-        {[...Array(5)].map((_, i) => (
+        {[...Array(6)].map((_, i) => ( // Increased skeleton count
           <Skeleton key={i} className="h-10 w-full rounded-md" />
         ))}
       </nav>
     );
   }
 
-  // Default to buyer navigation if user or userType is not available (e.g., during initial load or error)
-  // Or you could show no specific items or a "Please complete profile" message.
   const userType = currentUser?.userType || 'buyer'; 
   
   const userSpecificNavItems = userType === 'seller' ? sellerNavItems : buyerNavItems;
@@ -67,10 +67,10 @@ export default function AppSidebarNav() {
       {navItems.map((item) => (
         <Button
           key={item.href}
-          variant={pathname === item.href ? 'default' : 'ghost'}
+          variant={pathname.startsWith(item.href) && item.href !== '/dashboard' || pathname === item.href ? 'default' : 'ghost'}
           className={cn(
             'justify-start gap-2',
-            pathname === item.href
+            pathname.startsWith(item.href) && item.href !== '/dashboard' || pathname === item.href
               ? 'bg-sidebar-primary text-sidebar-primary-foreground hover:bg-sidebar-primary/90'
               : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
           )}
