@@ -13,7 +13,7 @@ import type { MarketTrend } from '@/lib/types';
 import { MarketTrendDataPointSchema, MarketTrendSchema } from '@/lib/schemas';
 
 
-export const MarketTrendInputSchema = z.object({
+const MarketTrendInputSchema = z.object({
   commodityName: z.string().min(2, { message: 'Commodity name must be specified.' })
     .describe('The name of the agricultural commodity to analyze (e.g., "Maize", "Coffee").'),
 });

@@ -8,11 +8,13 @@ import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import type { User } from '@/lib/types'; // Your rich User type
 import { useRouter } from 'next/navigation';
+import { ADMIN_USER_IDS } from '@/config/admin'; // Import admin UIDs
 
 interface AuthContextType {
   currentUser: User | null; // Your rich User type
   firebaseUser: FirebaseUser | null; // Raw Firebase Auth user
   loading: boolean;
+  isAdmin: boolean; // Add isAdmin flag
   logout: () => Promise<void>;
 }
 
@@ -22,6 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false); // State for admin status
   const router = useRouter();
 
   useEffect(() => {
@@ -29,21 +32,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setFirebaseUser(fbUser);
       if (fbUser) {
         // User is signed in, get their profile from Firestore
+        setIsAdmin(ADMIN_USER_IDS.includes(fbUser.uid)); // Check for admin status
         const userDocRef = doc(db, 'users', fbUser.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (userDocSnap.exists()) {
           setCurrentUser({ uid: fbUser.uid, ...userDocSnap.data() } as User);
         } else {
-          // This case might happen if Firestore doc creation failed during signup
-          // Or if user was created via Firebase console without a corresponding Firestore doc
-          console.warn(`No Firestore document found for user ${fbUser.uid}. Logging out.`);
-          // Potentially create a basic profile or log them out
-           setCurrentUser(null); // Or handle as an error
-           // await firebaseSignOut(auth); // Uncomment to force logout if profile is missing
+          console.warn(`No Firestore document found for user ${fbUser.uid}.`);
+          setCurrentUser(null);
+          setIsAdmin(false);
         }
       } else {
         // User is signed out
         setCurrentUser(null);
+        setIsAdmin(false);
       }
       setLoading(false);
     });
@@ -56,18 +58,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await firebaseSignOut(auth);
       setCurrentUser(null);
       setFirebaseUser(null);
-      router.push('/auth/login'); // Or to homepage
+      setIsAdmin(false);
+      router.push('/auth/login');
     } catch (error) {
       console.error("Error signing out: ", error);
-      // Handle error (e.g., show toast)
     }
   };
-
 
   const value = {
     currentUser,
     firebaseUser,
     loading,
+    isAdmin, // Provide isAdmin in the context
     logout,
   };
 
@@ -82,13 +84,12 @@ export function useAuth() {
   return context;
 }
 
-// Helper to create user profile in Firestore, typically called after signup
 export async function createUserProfileDocument(uid: string, data: Omit<User, 'uid'>) {
   const userDocRef = doc(db, 'users', uid);
   try {
     await setDoc(userDocRef, data);
   } catch (error) {
     console.error("Error creating user profile document:", error);
-    throw error; // Re-throw to be handled by caller
+    throw error;
   }
 }

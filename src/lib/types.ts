@@ -1,3 +1,4 @@
+
 import type { LucideIcon } from 'lucide-react';
 
 export interface User {
@@ -110,4 +111,10 @@ export interface Notification {
   link: string;
   isRead: boolean;
   timestamp: string; // ISO string
+}
+
+export interface AdminDashboardStats {
+    totalUsers: number;
+    totalListings: number;
+    totalReviews: number;
 }

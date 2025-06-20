@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
 
-export const TranslateMessageInputSchema = z.object({
+const TranslateMessageInputSchema = z.object({
   textToTranslate: z.string().min(1, {message: 'Message to translate cannot be empty.'})
     .describe('The text message that needs to be translated.'),
   sourceLanguage: z.string().describe("The language of the input text (e.g., 'English', 'Swahili', 'Auto-detect'). If 'Auto-detect', the AI will try to determine the source language."),
@@ -20,7 +20,7 @@ export const TranslateMessageInputSchema = z.object({
 });
 export type TranslateMessageInput = z.infer<typeof TranslateMessageInputSchema>;
 
-export const TranslateMessageOutputSchema = z.object({
+const TranslateMessageOutputSchema = z.object({
   translatedText: z.string().describe('The translated text message.'),
   detectedSourceLanguage: z.string().optional().describe('The language detected by the AI if sourceLanguage was set to "Auto-detect".'),
 });
@@ -66,4 +66,3 @@ const translateMessageFlow = ai.defineFlow(
     return output;
   }
 );
-
