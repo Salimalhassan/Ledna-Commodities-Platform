@@ -38,15 +38,15 @@ export default function ProfilePage() {
       avatarUrl: '',
       verificationType: '',
       verificationNumber: '',
+      primarySpokenLanguage: '',
     },
   });
 
   useEffect(() => {
     if (!authLoading && currentUser) {
-      // currentUser from AuthContext already contains Firestore data
       form.reset({
         name: currentUser.name || '',
-        email: currentUser.email || '', // Email typically comes from Auth, might be read-only
+        email: currentUser.email || '', 
         phone: currentUser.phone || '',
         address: currentUser.address || '',
         city: currentUser.city || '',
@@ -54,10 +54,10 @@ export default function ProfilePage() {
         avatarUrl: currentUser.avatarUrl || '',
         verificationType: currentUser.verificationType || '',
         verificationNumber: currentUser.verificationNumber || '',
+        primarySpokenLanguage: currentUser.primarySpokenLanguage || '',
       });
       setIsFetchingProfile(false);
     } else if (!authLoading && !currentUser) {
-        // Handle case where user is not logged in but somehow reached here (ProtectedRoute should prevent this)
         setIsFetchingProfile(false);
     }
   }, [currentUser, authLoading, form]);
@@ -76,7 +76,8 @@ export default function ProfilePage() {
           title: 'Profile Updated',
           description: result.message,
         });
-        // Optionally, you might want to re-fetch user data into AuthContext or rely on its existing mechanism
+        // AuthContext will re-fetch user data on next auth state change or app reload
+        // For immediate update, you might need to trigger a re-fetch in AuthContext or update its state.
       } else {
         toast({
           variant: 'destructive',
@@ -201,6 +202,18 @@ export default function ProfilePage() {
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl><Input placeholder="+254 700 000 000" {...field} disabled={isSubmitting} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="primarySpokenLanguage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Primary Spoken Language</FormLabel>
+                      <FormControl><Input placeholder="e.g., English, Swahili, Tiv" {...field} disabled={isSubmitting} /></FormControl>
+                      <FormDescription>Your main language. This may be added to your AI translator options for your convenience.</FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}

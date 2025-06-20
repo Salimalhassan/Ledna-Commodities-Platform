@@ -16,6 +16,7 @@ export interface User {
   verificationNumber?: string;
   isVerified?: boolean;
   userType: 'seller' | 'buyer';
+  primarySpokenLanguage?: string; // Added field
 }
 
 export interface CommodityCategory {
@@ -40,7 +41,7 @@ export interface Commodity {
   location?: string;
   datePosted: string; // ISO string date, from Firestore Timestamp
   externalLink?: string;
-  isFeatured?: boolean; // Added for featuring listings
+  isFeatured?: boolean;
 }
 
 export interface Review {

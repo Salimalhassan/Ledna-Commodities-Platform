@@ -11,7 +11,7 @@ import { useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { SignupSchema } from '@/lib/schemas';
@@ -36,6 +36,7 @@ export default function SignupPage() {
       password: '',
       confirmPassword: '',
       userType: 'buyer',
+      primarySpokenLanguage: '',
     },
   });
 
@@ -46,12 +47,11 @@ export default function SignupPage() {
       const firebaseUser = userCredential.user;
 
       if (firebaseUser) {
-        // Create user profile in Firestore
         const userProfileData: Omit<User, 'uid'> = {
           name: values.name,
           email: values.email,
           userType: values.userType,
-          // Initialize other fields as needed, e.g., empty strings or default values
+          primarySpokenLanguage: values.primarySpokenLanguage || '',
           avatarUrl: '',
           location: '',
           address: '',
@@ -90,14 +90,14 @@ export default function SignupPage() {
           <Image src={appLogo} alt="Ledna Commodities Logo" width={96} height={96} data-ai-hint="company logo" />
           <span className="font-headline">Ledna Commodities</span>
         </Link>
-      <Card className="w-full max-w-md shadow-xl">
+      <Card className="w-full max-w-lg shadow-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
           <CardDescription>Join Ledna to start trading commodities.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -124,37 +124,53 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <FormField
+               <FormField
                 control={form.control}
-                name="password"
+                name="primarySpokenLanguage"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>Primary Spoken Language (Optional)</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
+                      <Input placeholder="e.g., English, Swahili, Tiv" {...field} disabled={isLoading} />
                     </FormControl>
+                     <FormDescription>This language may be added to your AI translator options.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Password</FormLabel>
+                        <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="confirmPassword"
+                    render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Confirm Password</FormLabel>
+                        <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} disabled={isLoading} />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                    )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="userType"
                 render={({ field }) => (
-                  <FormItem className="space-y-3">
+                  <FormItem className="space-y-2">
                     <FormLabel>I am a...</FormLabel>
                     <FormControl>
                       <RadioGroup

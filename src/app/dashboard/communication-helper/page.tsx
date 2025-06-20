@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
@@ -15,8 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Languages, ArrowRightLeft } from 'lucide-react';
 import { TranslateMessageInputSchema, type TranslateMessageInput } from '@/ai/flows/translate-message-flow';
 import { handleTranslateMessage } from '@/actions/aiActions';
+import { useAuth } from '@/context/AuthContext'; // Import useAuth
 
-const languageOptions = [
+const baseLanguageOptions = [
   { value: 'Auto-detect', label: 'Auto-detect Source Language' },
   { value: 'Afrikaans', label: 'Afrikaans' },
   { value: 'Amharic', label: 'Amharic' },
@@ -37,16 +38,51 @@ const languageOptions = [
   { value: 'Tiv', label: 'Tiv' },
   { value: 'Yoruba', label: 'Yoruba' },
   { value: 'Zulu', label: 'Zulu' },
-];
-
-const targetLanguageOptions = languageOptions.filter(lang => lang.value !== 'Auto-detect');
+].sort((a, b) => { // Sort alphabetically, keeping Auto-detect at the top
+  if (a.value === 'Auto-detect') return -1;
+  if (b.value === 'Auto-detect') return 1;
+  return a.label.localeCompare(b.label);
+});
 
 
 export default function CommunicationHelperPage() {
   const { toast } = useToast();
+  const { currentUser } = useAuth(); // Get current user
   const [translatedText, setTranslatedText] = useState('');
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState('');
   const [isTranslating, setIsTranslating] = useState(false);
+
+  const [currentLanguageOptions, setCurrentLanguageOptions] = useState(baseLanguageOptions);
+  const [currentTargetLanguageOptions, setCurrentTargetLanguageOptions] = useState(
+    baseLanguageOptions.filter(lang => lang.value !== 'Auto-detect')
+  );
+
+  useEffect(() => {
+    if (currentUser?.primarySpokenLanguage) {
+      const userLang = currentUser.primarySpokenLanguage;
+      const userLangValue = userLang; // Assuming value and label are same for user's language
+      const userLangLabel = userLang;
+
+      const alreadyExists = baseLanguageOptions.some(opt => opt.value.toLowerCase() === userLangValue.toLowerCase());
+
+      if (!alreadyExists) {
+        const newUserLangOption = { value: userLangValue, label: userLangLabel };
+        
+        const updatedOptions = [...baseLanguageOptions, newUserLangOption].sort((a,b) => {
+            if (a.value === 'Auto-detect') return -1;
+            if (b.value === 'Auto-detect') return 1;
+            return a.label.localeCompare(b.label);
+        });
+        setCurrentLanguageOptions(updatedOptions);
+        setCurrentTargetLanguageOptions(updatedOptions.filter(lang => lang.value !== 'Auto-detect'));
+      }
+    } else {
+      // Reset to base if user has no language or logs out (though logout would navigate away)
+      setCurrentLanguageOptions(baseLanguageOptions);
+      setCurrentTargetLanguageOptions(baseLanguageOptions.filter(lang => lang.value !== 'Auto-detect'));
+    }
+  }, [currentUser]);
+
 
   const form = useForm<z.infer<typeof TranslateMessageInputSchema>>({
     resolver: zodResolver(TranslateMessageInputSchema),
@@ -142,7 +178,7 @@ export default function CommunicationHelperPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {languageOptions.map(lang => (
+                          {currentLanguageOptions.map(lang => (
                             <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
                           ))}
                         </SelectContent>
@@ -164,7 +200,7 @@ export default function CommunicationHelperPage() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {targetLanguageOptions.map(lang => (
+                          {currentTargetLanguageOptions.map(lang => (
                             <SelectItem key={lang.value} value={lang.value}>{lang.label}</SelectItem>
                           ))}
                         </SelectContent>

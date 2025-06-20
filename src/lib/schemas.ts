@@ -12,6 +12,7 @@ export const SignupSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
   userType: z.enum(['seller', 'buyer'], { required_error: "Please select your role." }),
+  primarySpokenLanguage: z.string().min(2, {message: "Language name should be at least 2 characters."}).optional().or(z.literal('')), // Added field
 }).refine(data => data.password === data.confirmPassword, {
   message: "Passwords do not match.",
   path: ["confirmPassword"],
@@ -27,6 +28,7 @@ export const UserProfileSchema = z.object({
   avatarUrl: z.string().url().optional().or(z.literal('')),
   verificationType: z.enum(["NIN", "Passport", ""]).optional(),
   verificationNumber: z.string().optional(),
+  primarySpokenLanguage: z.string().min(2, {message: "Language name should be at least 2 characters."}).optional().or(z.literal('')),
 });
 
 export const CommodityUploadSchema = z.object({
