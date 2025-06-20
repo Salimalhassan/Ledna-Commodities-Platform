@@ -1,5 +1,7 @@
+
 'use client';
 
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
@@ -14,11 +16,13 @@ import { commodityCategories, getCurrentUser } from '@/data/placeholder';
 import { useToast } from '@/hooks/use-toast';
 import { UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { handleCommodityUpload } from '@/actions/commodityActions';
 
 export default function CommodityUploadPage() {
   const currentUser = getCurrentUser();
   const { toast } = useToast();
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof CommodityUploadSchema>>({
     resolver: zodResolver(CommodityUploadSchema),
@@ -35,14 +39,34 @@ export default function CommodityUploadPage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof CommodityUploadSchema>) {
-    console.log('Commodity uploaded:', values);
-    toast({
-      title: 'Commodity Listed (Placeholder)',
-      description: `${values.name} has been successfully listed.`,
-    });
-    // In a real app, you would save the data and then redirect or clear form
-    router.push('/dashboard/commodities/my-listings');
+  async function onSubmit(values: z.infer<typeof CommodityUploadSchema>) {
+    setIsSubmitting(true);
+    try {
+      const result = await handleCommodityUpload(values);
+      if (result.success) {
+        toast({
+          title: 'Commodity Submitted',
+          description: result.message,
+        });
+        // In a real app, you would save the data and then redirect or clear form
+        router.push('/dashboard/commodities/my-listings');
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Submission Failed',
+          description: result.error || 'An unexpected error occurred.',
+        });
+      }
+    } catch (error) {
+      console.error('Commodity upload client error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to submit commodity due to a client-side error.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -63,7 +87,7 @@ export default function CommodityUploadPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Commodity Name</FormLabel>
-                    <FormControl><Input placeholder="e.g., Organic Maize" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g., Organic Maize" {...field} disabled={isSubmitting} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -74,7 +98,7 @@ export default function CommodityUploadPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
-                    <FormControl><Textarea placeholder="Detailed description of your commodity..." {...field} rows={4} /></FormControl>
+                    <FormControl><Textarea placeholder="Detailed description of your commodity..." {...field} rows={4} disabled={isSubmitting} /></FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -86,7 +110,7 @@ export default function CommodityUploadPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select a category" />
@@ -116,7 +140,7 @@ export default function CommodityUploadPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Image URL</FormLabel>
-                      <FormControl><Input placeholder="https://example.com/image.jpg" {...field} /></FormControl>
+                      <FormControl><Input placeholder="https://example.com/image.jpg" {...field} disabled={isSubmitting} /></FormControl>
                        <FormDescription>Link to an image of your commodity.</FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -130,7 +154,7 @@ export default function CommodityUploadPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Price</FormLabel>
-                      <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} /></FormControl>
+                      <FormControl><Input type="number" step="0.01" placeholder="0.00" {...field} disabled={isSubmitting} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -141,7 +165,7 @@ export default function CommodityUploadPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Unit</FormLabel>
-                      <FormControl><Input placeholder="e.g., kg, tonne, piece" {...field} /></FormControl>
+                      <FormControl><Input placeholder="e.g., kg, tonne, piece" {...field} disabled={isSubmitting} /></FormControl>
                        <FormDescription>Specify the unit of measurement for the price.</FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -154,7 +178,7 @@ export default function CommodityUploadPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Location (Optional)</FormLabel>
-                    <FormControl><Input placeholder="e.g., Nairobi, Kenya" {...field} /></FormControl>
+                    <FormControl><Input placeholder="e.g., Nairobi, Kenya" {...field} disabled={isSubmitting} /></FormControl>
                     <FormDescription>Where is the commodity located?</FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -166,7 +190,7 @@ export default function CommodityUploadPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Contact Information (Optional)</FormLabel>
-                    <FormControl><Input placeholder="Your phone or email for buyers" {...field} /></FormControl>
+                    <FormControl><Input placeholder="Your phone or email for buyers" {...field} disabled={isSubmitting} /></FormControl>
                     <FormDescription>How buyers can reach you. Defaults to your profile phone if empty.</FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -178,14 +202,16 @@ export default function CommodityUploadPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>External Page Link (Optional)</FormLabel>
-                    <FormControl><Input placeholder="https://yourwebsite.com/product" {...field} /></FormControl>
+                    <FormControl><Input placeholder="https://yourwebsite.com/product" {...field} disabled={isSubmitting} /></FormControl>
                      <FormDescription>Link to your own product page or social media.</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <div className="flex justify-end pt-4">
-                <Button type="submit" size="lg">List Commodity</Button>
+                <Button type="submit" size="lg" disabled={isSubmitting}>
+                  {isSubmitting ? 'Submitting...' : 'List Commodity'}
+                </Button>
               </div>
             </form>
           </Form>

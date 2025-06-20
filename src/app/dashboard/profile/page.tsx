@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import type * as z from 'zod';
@@ -16,10 +17,12 @@ import { getCurrentUser } from '@/data/placeholder';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { UploadCloud, ShieldCheck } from 'lucide-react';
+import { handleUpdateProfile } from '@/actions/profileActions';
 
 export default function ProfilePage() {
   const currentUser = getCurrentUser();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof UserProfileSchema>>({
     resolver: zodResolver(UserProfileSchema),
@@ -36,12 +39,33 @@ export default function ProfilePage() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof UserProfileSchema>) {
-    console.log('Profile updated:', values);
-    toast({
-      title: 'Profile Updated',
-      description: 'Your profile information has been saved (Placeholder).',
-    });
+  async function onSubmit(values: z.infer<typeof UserProfileSchema>) {
+    setIsSubmitting(true);
+    try {
+      const result = await handleUpdateProfile(values);
+      if (result.success) {
+        toast({
+          title: 'Profile Update Submitted',
+          description: result.message,
+        });
+        // Potentially refresh user data or re-fetch if necessary in a real app
+      } else {
+        toast({
+          variant: 'destructive',
+          title: 'Update Failed',
+          description: result.error || 'An unexpected error occurred.',
+        });
+      }
+    } catch (error) {
+      console.error('Profile update client error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to submit profile update due to a client-side error.',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const userInitials = currentUser.name.split(' ').map(n => n[0]).join('').toUpperCase();
@@ -69,7 +93,7 @@ export default function ProfilePage() {
                     <FormItem className="w-full">
                       <FormLabel>Avatar URL</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com/avatar.png" {...field} />
+                        <Input placeholder="https://example.com/avatar.png" {...field} disabled={isSubmitting} />
                       </FormControl>
                       <FormDescription>Enter the URL of your profile picture.</FormDescription>
                       <FormMessage />
@@ -96,7 +120,7 @@ export default function ProfilePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Full Name</FormLabel>
-                        <FormControl><Input {...field} /></FormControl>
+                        <FormControl><Input {...field} disabled={isSubmitting} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -107,7 +131,7 @@ export default function ProfilePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Email (Read-only)</FormLabel>
-                        <FormControl><Input {...field} readOnly /></FormControl>
+                        <FormControl><Input {...field} readOnly disabled={isSubmitting} /></FormControl>
                         <FormDescription>Email cannot be changed here.</FormDescription>
                         <FormMessage />
                       </FormItem>
@@ -120,7 +144,7 @@ export default function ProfilePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Phone Number</FormLabel>
-                      <FormControl><Input placeholder="+254 700 000 000" {...field} /></FormControl>
+                      <FormControl><Input placeholder="+254 700 000 000" {...field} disabled={isSubmitting} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -131,7 +155,7 @@ export default function ProfilePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Address</FormLabel>
-                      <FormControl><Textarea placeholder="123 Main St, Apt 4B" {...field} /></FormControl>
+                      <FormControl><Textarea placeholder="123 Main St, Apt 4B" {...field} disabled={isSubmitting} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -143,7 +167,7 @@ export default function ProfilePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>City</FormLabel>
-                        <FormControl><Input placeholder="Nairobi" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Nairobi" {...field} disabled={isSubmitting} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -154,7 +178,7 @@ export default function ProfilePage() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Country</FormLabel>
-                        <FormControl><Input placeholder="Kenya" {...field} /></FormControl>
+                        <FormControl><Input placeholder="Kenya" {...field} disabled={isSubmitting} /></FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -183,6 +207,7 @@ export default function ProfilePage() {
                       <Select
                         onValueChange={(value) => field.onChange(value === '__none__' ? '' : value)}
                         value={field.value === '' ? '__none__' : field.value || undefined}
+                        disabled={isSubmitting}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -205,7 +230,7 @@ export default function ProfilePage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Document Number</FormLabel>
-                      <FormControl><Input placeholder="Enter document number" {...field} /></FormControl>
+                      <FormControl><Input placeholder="Enter document number" {...field} disabled={isSubmitting} /></FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -225,7 +250,9 @@ export default function ProfilePage() {
           </Card>
 
           <div className="flex justify-end">
-            <Button type="submit">Save Profile</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : 'Save Profile'}
+            </Button>
           </div>
         </form>
       </Form>
