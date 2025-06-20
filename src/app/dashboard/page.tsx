@@ -7,14 +7,15 @@ import { Progress } from "@/components/ui/progress";
 import Link from "next/link";
 import { DollarSign, List, Package, Star, UploadCloud, UserCircle, LineChart, Search, Users, Loader2 } from "lucide-react";
 import Image from "next/image";
-import { sampleUsers } from "@/data/placeholder"; // sampleUsers kept for BuyerDashboard's Potential Sellers
+// Removed: import { sampleUsers } from "@/data/placeholder";
 import type { User, Commodity } from "@/lib/types";
 import SellerPreviewCard from "@/components/SellerPreviewCard";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
-import { fetchRecentUserCommodities } from "@/actions/commodityActions"; // Import the new action
+import { fetchRecentUserCommodities } from "@/actions/commodityActions";
+import { fetchSellers } from "@/actions/userActions"; // Import new action for fetching sellers
 import { useToast } from "@/hooks/use-toast";
 
 // Seller Dashboard Content
@@ -48,10 +49,10 @@ function SellerDashboard({ user }: { user: User }) {
   const completionPercentage = Math.round((profileCompletion / totalProfileFields) * 100);
 
   const quickStats = [
-    { title: "Active Listings", value: userCommodities.length, icon: <List className="h-6 w-6 text-primary" />, color: "text-primary" }, // Will update when full listings count is fetched
+    { title: "Active Listings", value: userCommodities.length, icon: <List className="h-6 w-6 text-primary" />, color: "text-primary" },
     { title: "Profile Completion", value: completionPercentage, icon: <UserCircle className="h-6 w-6 text-green-500" />, unit: "%", color: "text-green-500" },
-    { title: "Total Sales (Mock)", value: 0, icon: <DollarSign className="h-6 w-6 text-blue-500" />, unit: "USD", color: "text-blue-500" }, // Replace with actual data
-    { title: "Average Rating (Mock)", value: 0, icon: <Star className="h-6 w-6 text-yellow-500" />, unit: "/5", color: "text-yellow-500" }, // Replace with actual data
+    { title: "Total Sales (Mock)", value: 0, icon: <DollarSign className="h-6 w-6 text-blue-500" />, unit: "USD", color: "text-blue-500" },
+    { title: "Average Rating (Mock)", value: 0, icon: <Star className="h-6 w-6 text-yellow-500" />, unit: "/5", color: "text-yellow-500" },
   ];
 
   return (
@@ -150,8 +151,25 @@ function SellerDashboard({ user }: { user: User }) {
 
 // Buyer Dashboard Content
 function BuyerDashboard({ user }: { user: User }) {
-  // TODO: Fetch actual sellers from Firestore or implement a proper seller discovery mechanism
-  const potentialSellers = sampleUsers.filter(u => u.userType === 'seller');
+  const [potentialSellers, setPotentialSellers] = useState<User[]>([]);
+  const [isLoadingSellers, setIsLoadingSellers] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    async function loadPotentialSellers() {
+      setIsLoadingSellers(true);
+      try {
+        const fetchedSellers = await fetchSellers(6); // Fetch up to 6 sellers
+        setPotentialSellers(fetchedSellers);
+      } catch (error) {
+        console.error("Failed to fetch sellers:", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not load potential sellers." });
+      } finally {
+        setIsLoadingSellers(false);
+      }
+    }
+    loadPotentialSellers();
+  }, [toast]);
 
   return (
     <>
@@ -177,11 +195,32 @@ function BuyerDashboard({ user }: { user: User }) {
 
       <section>
         <h2 className="text-2xl font-bold mb-6 font-headline flex items-center">
-          <Users className="mr-3 h-7 w-7 text-primary" /> Featured Sellers (Placeholder)
+          <Users className="mr-3 h-7 w-7 text-primary" /> Featured Sellers
         </h2>
-        {potentialSellers.length > 0 ? (
+        {isLoadingSellers ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(3)].map((_, i) => (
+               <Card key={i} className="overflow-hidden shadow-lg flex flex-col h-full">
+                <CardHeader className="items-center text-center p-6">
+                  <Skeleton className="h-24 w-24 rounded-full mb-3" />
+                  <Skeleton className="h-6 w-3/4 mb-1" />
+                  <Skeleton className="h-4 w-1/2 mb-1" />
+                  <Skeleton className="h-4 w-1/3" />
+                </CardHeader>
+                <CardContent className="p-4 flex-grow text-center">
+                  <Skeleton className="h-4 w-full mb-1" />
+                  <Skeleton className="h-4 w-5/6" />
+                </CardContent>
+                <CardFooter className="p-4 border-t">
+                  <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : potentialSellers.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {potentialSellers.map(seller => (
+              // Ensure SellerPreviewCard uses seller.uid for the key and link
               <SellerPreviewCard key={seller.uid} seller={seller} />
             ))}
           </div>
@@ -208,6 +247,9 @@ export default function DashboardPage() {
   }
 
   if (!currentUser) {
+    // This case should be rare due to ProtectedRoute, but good to have.
+    // useRouter().push('/auth/login') could be called here if needed,
+    // but ProtectedRoute handles it more globally.
     return (
       <div className="container mx-auto py-8 px-4 md:px-6">
         <p>Please log in to view the dashboard.</p>

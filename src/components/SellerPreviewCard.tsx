@@ -12,7 +12,7 @@ interface SellerPreviewCardProps {
 }
 
 export default function SellerPreviewCard({ seller }: SellerPreviewCardProps) {
-  const sellerInitials = seller.name.split(' ').map(n => n[0]).join('').toUpperCase();
+  const sellerInitials = seller.name ? seller.name.split(' ').map(n => n[0]).join('').toUpperCase() : "S";
 
   return (
     <Card className="overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
@@ -21,7 +21,7 @@ export default function SellerPreviewCard({ seller }: SellerPreviewCardProps) {
           <AvatarImage src={seller.avatarUrl || `https://avatar.vercel.sh/${seller.email}.png`} alt={seller.name} data-ai-hint={seller.dataAiHint || "person business"} />
           <AvatarFallback className="text-3xl">{sellerInitials}</AvatarFallback>
         </Avatar>
-        <CardTitle className="text-xl font-headline">{seller.name}</CardTitle>
+        <CardTitle className="text-xl font-headline">{seller.name || "Seller"}</CardTitle>
         {seller.isVerified && (
           <div className="flex items-center text-xs text-green-600 mt-1">
             <ShieldCheck className="h-3 w-3 mr-1" /> Verified Seller
@@ -33,13 +33,14 @@ export default function SellerPreviewCard({ seller }: SellerPreviewCardProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow text-center">
         <p className="text-sm text-muted-foreground">
-          Explore commodities from {seller.name}. Specializing in high-quality agricultural products.
+          Explore commodities from {seller.name || "this seller"}. Specializing in high-quality agricultural products.
         </p>
         {/* Placeholder for a few commodity images or names if needed */}
       </CardContent>
       <CardFooter className="p-4 border-t">
         <Button asChild className="w-full">
-          <Link href={`/sellers/${seller.id}`}>View Profile & Listings</Link>
+          {/* Ensure the link uses seller.uid which is the document ID from Firestore */}
+          <Link href={`/sellers/${seller.uid}`}>View Profile & Listings</Link>
         </Button>
       </CardFooter>
     </Card>
