@@ -47,7 +47,7 @@ If the Source Language is 'Auto-detect', please first determine the source langu
 
 Provide the translation in the Target Language.
 If you detected the source language, also provide the name of the detected source language.
-Be direct and provide only the translation and, if applicable, the detected source language, matching the output schema.
+Your response should contain *only* the JSON object matching the output schema. Do not include any introductory or concluding remarks, just the direct JSON output for the translation and, if applicable, the detected source language.
 `,
 });
 
@@ -65,3 +65,4 @@ const translateMessageFlow = ai.defineFlow(
     return output;
   }
 );
+
