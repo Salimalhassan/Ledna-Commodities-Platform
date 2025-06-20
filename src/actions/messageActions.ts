@@ -103,6 +103,33 @@ export async function sendMessage(
     updatedAt: serverTimestamp(),
   });
 
+  // --- Start: Add notification logic ---
+  try {
+    const conversationSnap = await getDoc(conversationRef);
+    if (conversationSnap.exists()) {
+      const conversationData = conversationSnap.data();
+      const recipientId = conversationData.participantIds.find((id: string) => id !== senderId);
+
+      if (recipientId) {
+        const senderDoc = await getDoc(doc(db, 'users', senderId));
+        const senderName = senderDoc.exists() ? senderDoc.data()?.name : 'Someone';
+        
+        await addDoc(collection(db, 'notifications'), {
+          userId: recipientId,
+          type: 'new_message',
+          message: `You have a new message from ${senderName}.`,
+          link: `/dashboard/messages/${conversationId}`,
+          isRead: false,
+          timestamp: serverTimestamp(),
+        });
+      }
+    }
+  } catch (error) {
+    console.error("Failed to create notification:", error);
+    // Don't block message sending if notification fails
+  }
+  // --- End: Add notification logic ---
+
   revalidatePath(`/dashboard/messages`);
   revalidatePath(`/dashboard/messages/${conversationId}`);
 }

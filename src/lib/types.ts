@@ -101,3 +101,13 @@ export interface Conversation {
   } | null;
   updatedAt: string; // ISO string
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  type: 'new_message' | 'new_review' | 'transaction_update' | 'general';
+  message: string;
+  link: string;
+  isRead: boolean;
+  timestamp: string; // ISO string
+}
