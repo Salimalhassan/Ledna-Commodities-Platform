@@ -32,7 +32,11 @@ export async function createPaystackTransaction(
     return { error: "Payment service is not configured correctly." };
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (!appUrl) {
+    console.error("NEXT_PUBLIC_APP_URL environment variable is not set.");
+    return { error: "Application URL is not configured." };
+  }
   const callbackUrl = `${appUrl}/dashboard/commodities/my-listings?payment=success`;
 
   try {
