@@ -4,7 +4,7 @@
 import type * as z from 'zod';
 import type { CommodityUploadSchema } from '@/lib/schemas';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy, limit, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, serverTimestamp, Timestamp, orderBy, limit, doc, updateDoc, getDoc, deleteDoc } from 'firebase/firestore';
 import type { Commodity } from '@/lib/types';
 import { commodityCategories } from '@/data/placeholder'; // To get categoryName
 import { revalidatePath } from 'next/cache';
@@ -74,6 +74,78 @@ export async function handleCommodityUpload(
   }
 }
 
+export async function handleUpdateCommodity(
+  commodityId: string,
+  values: z.infer<typeof CommodityUploadSchema>
+): Promise<CommodityActionResult> {
+  if (!commodityId) {
+    return { success: false, message: 'Commodity ID is missing.' };
+  }
+  
+  const category = commodityCategories.find(c => c.id === values.categoryId);
+  if (!category) {
+    return { success: false, message: 'Invalid category selected.' };
+  }
+
+  try {
+    const commodityRef = doc(db, 'commodities', commodityId);
+    const updatedData = {
+      ...values,
+      categoryId: category.id,
+      categoryName: category.name,
+      // Retain original seller info, featured status, and post date
+      // These should not be editable from this form
+    };
+    
+    await updateDoc(commodityRef, updatedData);
+    
+    // Revalidate paths to show updated data
+    revalidatePath('/dashboard/commodities/my-listings');
+    revalidatePath(`/dashboard/commodities/edit/${commodityId}`);
+    revalidatePath('/dashboard/commodities/find');
+
+    return {
+      success: true,
+      message: `Commodity "${values.name}" has been updated successfully.`,
+      commodityId: commodityId,
+    };
+  } catch (e) {
+    console.error("Error in handleUpdateCommodity:", e);
+    return {
+      success: false,
+      message: "Failed to update commodity.",
+      error: e instanceof Error ? e.message : "An unknown error occurred."
+    };
+  }
+}
+
+export async function handleDeleteCommodity(commodityId: string): Promise<CommodityActionResult> {
+  if (!commodityId) {
+    return { success: false, message: 'Commodity ID is missing.' };
+  }
+
+  try {
+    const commodityRef = doc(db, 'commodities', commodityId);
+    await deleteDoc(commodityRef);
+    
+    revalidatePath('/dashboard/commodities/my-listings');
+    revalidatePath('/dashboard/commodities/find');
+
+    return {
+      success: true,
+      message: `Commodity has been deleted successfully.`,
+    };
+  } catch (e) {
+    console.error("Error in handleDeleteCommodity:", e);
+    return {
+      success: false,
+      message: "Failed to delete commodity.",
+      error: e instanceof Error ? e.message : "An unknown error occurred."
+    };
+  }
+}
+
+
 export async function fetchCommodities(): Promise<Commodity[]> {
   try {
     const commoditiesCol = collection(db, 'commodities');
@@ -83,6 +155,21 @@ export async function fetchCommodities(): Promise<Commodity[]> {
   } catch (error) {
     console.error("Error fetching commodities:", error);
     return [];
+  }
+}
+
+export async function fetchCommodityById(commodityId: string): Promise<Commodity | null> {
+  if (!commodityId) return null;
+  try {
+    const commodityRef = doc(db, 'commodities', commodityId);
+    const docSnap = await getDoc(commodityRef);
+    if (docSnap.exists()) {
+      return mapFirestoreDocToCommodity(docSnap);
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching commodity by ID:", error);
+    return null;
   }
 }
 

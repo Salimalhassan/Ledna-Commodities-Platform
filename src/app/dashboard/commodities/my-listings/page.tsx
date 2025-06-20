@@ -54,6 +54,12 @@ export default function MyListingsPage() {
       )
     );
   };
+  
+  const handleDeleteListing = (commodityId: string) => {
+    setUserCommodities(prevCommodities =>
+      prevCommodities.filter(c => c.id !== commodityId)
+    );
+  };
 
 
   if (authLoading || (currentUser?.userType === 'seller' && isLoadingCommodities && userCommodities.length === 0) ) {
@@ -137,7 +143,8 @@ export default function MyListingsPage() {
               key={commodity.id} 
               commodity={commodity} 
               showFeatureManagement={true}
-              onFeatureStatusChange={handleFeatureStatusChange} 
+              onFeatureStatusChange={handleFeatureStatusChange}
+              onDelete={handleDeleteListing}
             />
           ))}
         </div>
@@ -145,7 +152,7 @@ export default function MyListingsPage() {
         <div className="text-center py-12">
           <PackageSearch className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
           <h2 className="text-xl font-semibold mb-2">No Listings Yet</h2>
-          <p className="text-muted-foreground mb-4">You haven&apos;t listed any commodities. Start selling now!</p>
+          <p className="text-muted-foreground mb-4">You haven't listed any commodities. Start selling now!</p>
           <Button asChild>
             <Link href="/dashboard/commodities/upload">Create Your First Listing</Link>
           </Button>
