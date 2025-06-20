@@ -5,7 +5,7 @@ import CommodityCard from '@/components/CommodityCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { commodityCategories } from '@/data/placeholder'; // Still needed for category select
+import { commodityCategories } from '@/data/placeholder';
 import { Search, Filter, Loader2 } from 'lucide-react';
 import { useState, useEffect, useMemo } from 'react';
 import type { Commodity } from '@/lib/types';
@@ -13,14 +13,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { fetchCommodities } from '@/actions/commodityActions';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Label } from '@/components/ui/label';
 
 
 export default function FindCommoditiesPage() {
   const [allCommodities, setAllCommodities] = useState<Commodity[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(''); // Empty string means 'All Categories'
   const { toast } = useToast();
+
+  // Filter States
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [minPrice, setMinPrice] = useState('');
+  const [maxPrice, setMaxPrice] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [sortBy, setSortBy] = useState('date_desc'); // default sort
 
   useEffect(() => {
     async function loadCommodities() {
@@ -39,13 +46,52 @@ export default function FindCommoditiesPage() {
   }, [toast]);
 
   const filteredCommodities = useMemo(() => {
-    return allCommodities.filter(commodity => {
-      const matchesSearchTerm = commodity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                                commodity.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory ? commodity.categoryId === selectedCategory : true;
-      return matchesSearchTerm && matchesCategory;
-    });
-  }, [allCommodities, searchTerm, selectedCategory]);
+    let commodities = allCommodities;
+
+    // Text search filter
+    if (searchTerm) {
+      commodities = commodities.filter(commodity =>
+        commodity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        commodity.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Category filter
+    if (selectedCategory) {
+      commodities = commodities.filter(commodity => commodity.categoryId === selectedCategory);
+    }
+    
+    // Price range filter
+    if (minPrice) {
+      commodities = commodities.filter(commodity => commodity.price >= parseFloat(minPrice));
+    }
+    if (maxPrice) {
+      commodities = commodities.filter(commodity => commodity.price <= parseFloat(maxPrice));
+    }
+
+    // Location filter
+    if (locationFilter) {
+      commodities = commodities.filter(commodity =>
+        commodity.location?.toLowerCase().includes(locationFilter.toLowerCase())
+      );
+    }
+
+    // Sorting
+    switch (sortBy) {
+      case 'price_asc':
+        commodities.sort((a, b) => a.price - b.price);
+        break;
+      case 'price_desc':
+        commodities.sort((a, b) => b.price - a.price);
+        break;
+      case 'date_desc':
+      default:
+        commodities.sort((a, b) => new Date(b.datePosted).getTime() - new Date(a.datePosted).getTime());
+        break;
+    }
+
+    return commodities;
+  }, [allCommodities, searchTerm, selectedCategory, minPrice, maxPrice, locationFilter, sortBy]);
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
@@ -63,24 +109,22 @@ export default function FindCommoditiesPage() {
           <CardDescription>Refine your search to find the perfect commodities.</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
             <div className="lg:col-span-2">
-              <label htmlFor="search" className="block text-sm font-medium text-foreground mb-1">Search Term</label>
+              <Label htmlFor="search-term">Search Term</Label>
               <Input
-                id="search"
+                id="search-term"
                 type="text"
-                placeholder="e.g., Organic Maize, Fresh Apples..."
+                placeholder="e.g., Organic Maize..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-foreground mb-1">Category</label>
+             <div>
+              <Label htmlFor="category">Category</Label>
               <Select
                 value={selectedCategory === '' ? '__all__' : selectedCategory}
-                onValueChange={(value) => {
-                  setSelectedCategory(value === '__all__' ? '' : value);
-                }}
+                onValueChange={(value) => setSelectedCategory(value === '__all__' ? '' : value)}
               >
                 <SelectTrigger id="category">
                   <SelectValue placeholder="All Categories" />
@@ -100,6 +144,49 @@ export default function FindCommoditiesPage() {
                   })}
                 </SelectContent>
               </Select>
+            </div>
+             <div>
+              <Label htmlFor="sort-by">Sort By</Label>
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger id="sort-by">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date_desc">Newest First</SelectItem>
+                  <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                  <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="min-price">Min Price ($)</Label>
+              <Input
+                id="min-price"
+                type="number"
+                placeholder="0"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="max-price">Max Price ($)</Label>
+              <Input
+                id="max-price"
+                type="number"
+                placeholder="Any"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+              />
+            </div>
+            <div className="lg:col-span-2">
+              <Label htmlFor="location">Location</Label>
+              <Input
+                id="location"
+                type="text"
+                placeholder="e.g., Nairobi, Kenya"
+                value={locationFilter}
+                onChange={(e) => setLocationFilter(e.target.value)}
+              />
             </div>
           </div>
         </CardContent>
@@ -129,10 +216,10 @@ export default function FindCommoditiesPage() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12">
+        <div className="text-center py-16 bg-muted/40 rounded-lg">
           <Search className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <h2 className="text-xl font-semibold mb-2">No Commodities Found</h2>
-          <p className="text-muted-foreground">Try adjusting your search terms or filters. If you expect commodities, they may still be loading or there might be none listed.</p>
+          <h2 className="text-2xl font-semibold mb-2">No Commodities Found</h2>
+          <p className="text-muted-foreground max-w-md mx-auto">Try adjusting your search terms or filters. There may be no listings matching your current criteria.</p>
         </div>
       )}
     </div>
