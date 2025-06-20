@@ -34,6 +34,8 @@ const languageOptions = [
   { value: 'Amharic', label: 'Amharic' },
   { value: 'Somali', label: 'Somali' },
   { value: 'Oromo', label: 'Oromo' },
+  { value: 'Afrikaans', label: 'Afrikaans' },
+  { value: 'Kinyarwanda', label: 'Kinyarwanda' },
 ];
 
 const targetLanguageOptions = languageOptions.filter(lang => lang.value !== 'Auto-detect');

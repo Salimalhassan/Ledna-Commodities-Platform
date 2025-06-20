@@ -37,6 +37,7 @@ const translateMessagePrompt = ai.definePrompt({
   prompt: `You are a helpful translation assistant designed to bridge language gaps between local farmers and international buyers.
 Many users may have limited literacy or may not be native speakers of the input language.
 Therefore, be robust to misspellings, grammatical errors, and informal language. Focus on conveying the core meaning and intent of the message accurately.
+If any specific regional nuances or formality levels are particularly important for the {{{targetLanguage}}}, please consider them in your translation, while still prioritizing clear communication of the original intent.
 
 Translate the following text:
 Input Text: {{{textToTranslate}}}
