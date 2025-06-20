@@ -26,6 +26,7 @@ const sellerNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutGrid },
   { href: '/dashboard/commodities/my-listings', label: 'My Listings', icon: List },
   { href: '/dashboard/commodities/upload', label: 'Upload Commodity', icon: UploadCloud },
+  { href: '/dashboard/seller/transactions', label: 'My Sales', icon: ShoppingCart },
   { href: '/dashboard/market-trends', label: 'Market Trends', icon: LineChart },
 ];
 
