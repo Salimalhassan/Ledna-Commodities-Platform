@@ -121,7 +121,7 @@ export default function LandingPage() {
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="relative py-20 md:py-32 bg-gradient-to-br from-primary/20 via-background to-accent/10 overflow-hidden">
-          <div className="absolute inset-0 opacity-10"> {/* Increased opacity slightly */}
+          <div className="absolute inset-0 opacity-7"> {/* Increased opacity slightly */}
             <Image
               src={coffeeImage} 
               alt="Coffee plantation background"

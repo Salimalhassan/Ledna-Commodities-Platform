@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAIgL4VHVFJm8h8P31FoA_cV526Pu8kphw",
+  apiKey: process.env.NEXT_PUBLIC_API_KEY,
   authDomain: "ledna-commodities-platform.firebaseapp.com",
   projectId: "ledna-commodities-platform",
   storageBucket: "ledna-commodities-platform.firebasestorage.app",

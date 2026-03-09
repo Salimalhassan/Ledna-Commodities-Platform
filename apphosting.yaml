@@ -6,3 +6,4 @@ runConfig:
   # more instances in response to increased traffic.
   environmentVariables:
     NEXT_PUBLIC_APP_URL: https://www.ledna.xyz
+    NEXT_PUBLIC_API_KEY: "AIzaSyAIgL4VHVFJm8h8P31FoA_cV526Pu8kphw"
